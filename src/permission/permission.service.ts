@@ -2,11 +2,16 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { TypeOrmPermissionRepository } from './repositories/typeorm-permission.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Permission } from './entities/permission.entity';
 
 @Injectable()
 export class PermissionService {
   constructor(
     private readonly permissionRepository: TypeOrmPermissionRepository,
+    @InjectRepository(Permission)
+    private readonly permissionTypeormRepository: Repository<Permission>,
   ) {}
 
   async create(createPermissionDto: CreatePermissionDto) {
@@ -72,8 +77,20 @@ export class PermissionService {
   }
 
   async remove(id: string) {
-    try {
-      await this.findOne(id);
+    try {     
+      // Получаем разрешение со связями
+      const permissionWithRoles = await this.permissionTypeormRepository.findOne({
+        where: { id },
+        relations: ['roles']
+      });
+
+      if (permissionWithRoles && permissionWithRoles.roles) {
+        // Очищаем связи с ролями
+        permissionWithRoles.roles = [];
+        await this.permissionTypeormRepository.save(permissionWithRoles);
+      }
+
+      // Теперь можно безопасно удалить разрешение
       return this.permissionRepository.delete(id);
     } catch (error) {
       if (error instanceof NotFoundException) {

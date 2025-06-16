@@ -15,7 +15,7 @@ export class Role {
 
   @ManyToMany(() => Permission, (permission) => permission.roles)
   @JoinTable({
-    name: 'roles_permissions', // Имя промежуточной таблицы
+    name: 'roles_permissions',
     joinColumn: {
       name: 'role_id',
       referencedColumnName: 'id'
@@ -26,5 +26,4 @@ export class Role {
     }
   })
   permissions: Permission[];
-
 }
