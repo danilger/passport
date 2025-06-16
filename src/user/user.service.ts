@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TypeOrmUserRepository } from './repositories/typeorm-user.repository';
@@ -22,9 +26,11 @@ export class UserService {
 
   async findAll() {
     try {
-      return this.repository.findAll();
+      return await this.repository.findAll();
     } catch (error) {
-      throw new BadRequestException('Ошибка при получении списка пользователей');
+      throw new BadRequestException(
+        'Ошибка при получении списка пользователей',
+      );
     }
   }
 
@@ -45,7 +51,6 @@ export class UserService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
-      await this.findOne(id);
       return this.repository.update(id, updateUserDto);
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -94,10 +99,11 @@ export class UserService {
 
       // Обновляем список ролей
       user.roles = [...user.roles, ...rolesArray];
-      
+
       // Убираем дубликаты по id
-      user.roles = user.roles.filter((role, index, self) =>
-        index === self.findIndex((r) => r.id === role.id)
+      user.roles = user.roles.filter(
+        (role, index, self) =>
+          index === self.findIndex((r) => r.id === role.id),
       );
 
       return this.repository.save(user);

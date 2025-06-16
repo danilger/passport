@@ -39,7 +39,7 @@ export class TypeOrmUserRepository
     return this.userRepository.save(user);
   }
 
-  async update(id: string, data: Partial<User>): Promise<User | null> {
+  async update(id: string, data: Partial<User>): Promise<User | null > {
     await this.userRepository.update(id, data);
     return this.findById(id);
   }

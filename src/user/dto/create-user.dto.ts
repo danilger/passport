@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
 
 export class CreateUserDto {
@@ -24,6 +25,7 @@ export class CreateUserDto {
     example: 'password123',
     minLength: 6
   })
+  @Exclude()
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
