@@ -249,6 +249,11 @@ async checkUserPermission(userId: string, permissionName: string): Promise<boole
 - Хеширование паролей с использованием bcrypt
 - Валидация входящих данных через DTO
 - Защита endpoints с помощью JWT и ролевых гвардов
+- Безопасное хранение JWT токена:
+  * Использование HttpOnly кук предотвращает доступ к токену через JavaScript
+  * Флаг Secure обеспечивает передачу токена только по HTTPS
+  * SameSite=Strict защищает от CSRF атак
+  * Токен недоступен для вредоносных скриптов при XSS атаках
 
 ### Аутентификация с Passport.js
 
@@ -311,10 +316,14 @@ POST /auth/login
 }
 
 // 2. LocalStrategy проверяет credentials
-// 3. В случае успеха генерируется JWT токен
+// 3. В случае успеха генерируется JWT токен и устанавливается в HttpOnly куки
+// Ответ от сервера:
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "message": "Успешная аутентификация"
 }
+
+// Заголовки ответа:
+Set-Cookie: access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict
 ```
 
 2. **Защита маршрутов**
@@ -328,7 +337,25 @@ getProfile(@Request() req) {
 
 #### Особенности реализации
 
-1. **Конфигурация модуля**
+1. **Безопасное хранение токена**
+```typescript
+@Injectable()
+export class AuthService {
+  async login(user: any) {
+    const token = this.jwtService.sign(payload);
+    
+    // Установка токена в HttpOnly куки
+    return {
+      message: 'Успешная аутентификация',
+      headers: {
+        'Set-Cookie': `access_token=${token}; HttpOnly; Secure; SameSite=Strict`
+      }
+    };
+  }
+}
+```
+
+2. **Конфигурация модуля**
 ```typescript
 @Module({
   imports: [
@@ -352,13 +379,13 @@ getProfile(@Request() req) {
 export class AuthModule {}
 ```
 
-2. **Безопасность токенов**
+3. **Безопасность токенов**
 - Ограниченный срок жизни (24 часа)
 - Подпись с использованием секретного ключа
 - Проверка издателя и аудитории
 - Защита от XSS и CSRF атак
 
-3. **Обработка ошибок**
+4. **Обработка ошибок**
 ```typescript
 try {
   const user = await this.authService.validateUser(username, password);
