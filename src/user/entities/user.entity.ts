@@ -1,8 +1,15 @@
 import * as bcrypt from 'bcrypt';
-import { IsEmail } from 'class-validator';
-import { Role } from '../../role/entities/role.entity'; // путь должен быть относительным иначе возникает ошибка при создании миграции
-import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { IsEmail } from 'class-validator';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn
+} from 'typeorm';
+import { Role } from '../../role/entities/role.entity'; // путь должен быть относительным иначе возникает ошибка при создании миграции
 
 @Entity('user')
 export class User {

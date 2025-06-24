@@ -1,19 +1,32 @@
 import {
+  BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
-  BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { AuthService } from 'src/auth/auth.service';
+import {
+  IRoleRepository,
+  IUserRepository,
+} from 'src/common/interfaces/repository.interface';
+import { ROLE_REPOSITORY } from 'src/role/repositories/typeorm-role.repository';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { TypeOrmUserRepository } from './repositories/typeorm-user.repository';
 import { User } from './entities/user.entity';
-import { TypeOrmRoleRepository } from 'src/role/repositories/typeorm-role.repository';
-
+import { USER_REPOSITORY } from './repositories/typeorm-user.repository';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UserService {
   constructor(
-    private repository: TypeOrmUserRepository,
-    private readonly roleRepository: TypeOrmRoleRepository,
+    @Inject(USER_REPOSITORY)
+    private repository: IUserRepository,
+    @Inject(ROLE_REPOSITORY)
+    private readonly roleRepository: IRoleRepository,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -62,10 +75,22 @@ export class UserService {
 
   async remove(id: string) {
     try {
-      await this.findOne(id);
+      const user = await this.findOne(id);
+      const hasUserRole =
+        user.roles.find((role) => role.name == 'admin') || null;
+
+      if (hasUserRole) {
+        throw new BadRequestException(
+          'Нельзя удалить пользователя с ролью администратора',
+        );
+      }
       return this.repository.delete(id);
     } catch (error) {
+      // так иначе будте возвращать ошибку BadRequestException
       if (error instanceof NotFoundException) {
+        throw error;
+      }
+      if (error instanceof BadRequestException) {
         throw error;
       }
       throw new BadRequestException('Ошибка при удалении пользователя');
@@ -112,6 +137,35 @@ export class UserService {
         throw error;
       }
       throw new BadRequestException('Ошибка при назначении ролей пользователю');
+    }
+  }
+
+  async changePassword(
+    { newPassword, previousPassword }: UpdatePasswordDto,
+    req: Request & { user: { userId: string, username: string } },
+  ) {
+    if (!req?.user) {
+      throw new UnauthorizedException('Пользователь не авторизован');
+    }
+
+    const validUser = await this.authService.validateUser(
+      req.user.username,
+      previousPassword,
+    );
+
+    if (!validUser) {
+      throw new UnauthorizedException('Неверный старый пароль');
+    }
+
+
+    try {
+      await this.repository.update(req.user.userId, { password: await bcrypt.hash(newPassword, 10) });
+      return { message: 'Пароль успешно изменен' };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Ошибка при смене пароля');
     }
   }
 }

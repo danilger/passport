@@ -1,18 +1,22 @@
-import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
-import { TypeOrmUserRepository } from './repositories/typeorm-user.repository';
+import { AuthModule } from 'src/auth/auth.module';
 import { RoleModule } from 'src/role/role.module';
+import { User } from './entities/user.entity';
+import {
+  TypeOrmUserRepository,
+  USER_REPOSITORY,
+} from './repositories/typeorm-user.repository';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    RoleModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User]), RoleModule, forwardRef(() => AuthModule)],
   controllers: [UserController],
-  providers: [UserService, TypeOrmUserRepository],
-  exports: [UserService, TypeOrmUserRepository],
+  providers: [
+    UserService,
+    { provide: USER_REPOSITORY, useClass: TypeOrmUserRepository },
+  ],
+  exports: [UserService, USER_REPOSITORY],
 })
 export class UserModule {}

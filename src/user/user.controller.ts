@@ -1,11 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBody,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiBody, ApiParam } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserService } from './user.service';
 
 @ApiTags('users')
 @Controller('user')
@@ -20,6 +39,8 @@ export class UserController {
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
   @Post()
+  @Permissions('can_create:user')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -32,8 +53,8 @@ export class UserController {
   })
   @ApiResponse({ status: 403, description: 'Нет доступа' })
   @Get()
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_read:users')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   findAll() {
     return this.userService.findAll();
   }
@@ -47,8 +68,8 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Пользователь не найден' })
   @Get(':id')
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_read:user')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
@@ -63,8 +84,8 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Пользователь не найден' })
   @Patch(':id')
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_update:user')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
@@ -78,8 +99,8 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Пользователь не найден' })
   @Delete(':id')
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_delete:user')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
@@ -95,10 +116,10 @@ export class UserController {
           type: 'array',
           items: { type: 'string' },
           description: 'Массив названий ролей',
-          example: ['admin', 'user']
-        }
-      }
-    }
+          example: ['admin', 'user'],
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 200,
@@ -106,12 +127,20 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Пользователь или роли не найдены' })
   @Post('set-roles/:id')
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  async setRoleToUser(
-    @Param('id') id: string,
-    @Body('roles') roles: string[],
-  ) {
+  @Permissions('can_manage:user_roles')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  async setRoleToUser(@Param('id') id: string, @Body('roles') roles: string[]) {
     return this.userService.setRoleToUser(id, roles);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  @Permissions('can_change:own_password')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  async changePassword(
+    @Body() newPassword: UpdatePasswordDto,
+    @Req() req: Request & { user: { userId: string; username: string } },
+  ) {
+    return await this.userService.changePassword(newPassword, req);
   }
 }

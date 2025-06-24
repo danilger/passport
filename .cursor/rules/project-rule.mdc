@@ -3,9 +3,6 @@ description:
 globs: *.tsx,*.json,*.ts,*.js.,*.yml
 alwaysApply: false
 ---
-птимизированный и более формализованный вариант твоего правила для Cursor IDE:
-
----
 
 **@TODO правило обработки задач в файле TODO:**
 

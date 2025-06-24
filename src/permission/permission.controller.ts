@@ -3,8 +3,8 @@ import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('permissions')
@@ -19,8 +19,8 @@ export class PermissionController {
     description: 'Разрешение успешно создано',
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Permissions('can_create:permission')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createPermissionDto: CreatePermissionDto) {
@@ -32,8 +32,8 @@ export class PermissionController {
     status: 200,
     description: 'Список разрешений успешно получен',
   })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Permissions('can_read:permissions')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
   findAll() {
     return this.permissionService.findAll();
@@ -46,8 +46,8 @@ export class PermissionController {
     description: 'Разрешение успешно найдено',
   })
   @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Permissions('can_read:permission')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.permissionService.findOne(id);
@@ -61,8 +61,8 @@ export class PermissionController {
     description: 'Данные разрешения успешно обновлены',
   })
   @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Permissions('can_update:permission')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
     return this.permissionService.update(id, updatePermissionDto);
@@ -75,8 +75,8 @@ export class PermissionController {
     description: 'Разрешение успешно удалено',
   })
   @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Permissions('can_delete:permission')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {

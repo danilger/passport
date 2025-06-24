@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
-  IFindByName,
-  IRepository,
-  ISave,
+  IUserRepository
 } from '../../common/interfaces/repository.interface';
-import { User } from '../entities/user.entity';
-import { Role } from '../../role/entities/role.entity';
 import { Permission } from '../../permission/entities/permission.entity';
+import { Role } from '../../role/entities/role.entity';
+import { User } from '../entities/user.entity';
 
 // Расширенный тип User с загруженными связями
 type UserWithRelations = User & {
@@ -17,17 +15,26 @@ type UserWithRelations = User & {
   })[];
 };
 
+export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
+
 @Injectable()
 export class TypeOrmUserRepository
-  implements IRepository<UserWithRelations>, IFindByName<UserWithRelations>, ISave<User>
-{
+  implements IUserRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
 
   async findById(id: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['roles'],
+      select: {
+        roles: {
+          name: true,
+        },
+      },
+    });
   }
 
   async findAll(): Promise<User[]> {
@@ -39,7 +46,7 @@ export class TypeOrmUserRepository
     return this.userRepository.save(user);
   }
 
-  async update(id: string, data: Partial<User>): Promise<User | null > {
+  async update(id: string, data: Partial<User>): Promise<User | null> {
     await this.userRepository.update(id, data);
     return this.findById(id);
   }
@@ -60,7 +67,7 @@ export class TypeOrmUserRepository
     // Сначала получаем существующего пользователя со всеми отношениями
     const existingUser = await this.userRepository.findOne({
       where: { id: user.id },
-      relations: ['roles']
+      relations: ['roles'],
     });
 
     if (!existingUser) {

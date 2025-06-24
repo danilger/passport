@@ -35,6 +35,7 @@ import {
     constructor(private reflector: Reflector) {}
   
     canActivate(context: ExecutionContext): boolean {
+
       const requiredRoles = this.reflector.getAllAndOverride<string[]>(
         ROLES_KEY,
         [
@@ -59,7 +60,7 @@ import {
       try {
      
         // Декодируем JWT токен
-        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET || '') as unknown as { roles: string[] };
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET || '') as { roles: string[] };
  
         
         // Проверяем наличие ролей

@@ -1,3 +1,7 @@
+import { Permission } from 'src/permission/entities/permission.entity';
+import { Role } from 'src/role/entities/role.entity';
+import { User } from 'src/user/entities/user.entity';
+
 /**
  * Aбстрактный интерфейс, который будет описывать контракт для работы с данными.
  * Это позволит унифицировать методы независимо от источника данных.
@@ -11,14 +15,60 @@ export interface IRepository<T> {
   delete(id: string): Promise<boolean>;
 }
 
-export interface IFindByName<T> {
-  findByName(name: string): Promise<T | null>;
+/**
+ * Интерфейс репозитория для работы с сущностью пользователя.
+ * Расширяет базовый интерфейс {@link IRepository} специфичными для пользователя методами.
+ */
+export interface IUserRepository extends IRepository<User> {
+  /**
+   * Поиск пользователя по имени
+   */
+  findByName(name: string): Promise<User | null>;
+
+  /**
+   * Сохранение сущности пользователя
+   */
+  save(entity: User): Promise<User>;
 }
 
-export interface IFindByNames<T> {
-  findByNames(names: string[]): Promise<T[] | null>;
+/**
+ * Интерфейс репозитория для работы с разрешениями.
+ * Расширяет базовый интерфейс {@link IRepository} специфичными для разрешений методами.
+ */
+export interface IPermissionRepository extends IRepository<Permission> {
+  /**
+   * Поиск разрешения по имени
+   */
+  findByName(name: string): Promise<Permission | null>;
+
+  /**
+   * Поиск нескольких разрешений по их названиям
+   */
+  findByNames(names: string[]): Promise<Permission[] | null>;
+
+    /**
+   * Сохранение сущности разрешения
+   */
+    save(entity: Permission): Promise<Permission>;
 }
 
-export interface ISave<T> {
-  save(entity: T): Promise<T>;
-} 
+/**
+ * Интерфейс репозитория для работы с ролями.
+ * Расширяет базовый интерфейс {@link IRepository} специфичными для ролей методами.
+ */
+export interface IRoleRepository extends IRepository<Role> {
+  /**
+   * Поиск ролей по имени
+   */
+  findByName(name: string): Promise<Role | null>;
+
+  /**
+   * Поиск нескольких ролей по их названиям
+   */
+  findByNames(names: string[]): Promise<Role[] | null>;
+
+  /**
+   * Сохранение сущности роли
+   */
+  save(entity: Role): Promise<Role>;
+}

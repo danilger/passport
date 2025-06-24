@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { Role } from '../entities/role.entity';
 import {
-  IFindByName,
-  IFindByNames,
-  IRepository,
-  ISave,
+  IRoleRepository
 } from '../../common/interfaces/repository.interface';
+import { Role } from '../entities/role.entity';
+
+export const ROLE_REPOSITORY = Symbol('ROLE_REPOSITORY');
 
 @Injectable()
 export class TypeOrmRoleRepository
-  implements IRepository<Role>, IFindByName<Role>, IFindByNames<Role>, ISave<Role>
+  implements IRoleRepository
 {
   constructor(
     @InjectRepository(Role)

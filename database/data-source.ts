@@ -5,7 +5,7 @@ import { join } from 'path';
 // Загрузка переменных окружения из .env-файла
 dotenv.config();
 
-// Экспорт конфигурации подключения к PostgreSQL для миграций TypeORM
+/**Экспорт конфигурации подключения к PostgreSQL для миграций TypeORM */
 export default new DataSource({
   type: 'postgres', // Тип СУБД
   host: process.env.HOST,

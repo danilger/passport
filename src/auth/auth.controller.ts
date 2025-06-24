@@ -7,12 +7,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
-import { AuthService } from './auth.service';
+import {
+  ApiBody,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Request, Response } from 'express';
+import { AuthService, UserWithRolesAndPermissions } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth, ApiBody } from '@nestjs/swagger';
-import { LoginDto } from './dto/login.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,19 +32,23 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: 200,
-    description: 'Успешный вход в систему. Устанавливаются куки access_token и refresh_token',
+    description:
+      'Успешный вход в систему. Устанавливаются куки access_token и refresh_token',
   })
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const user = req.user;
+  async login(
+    @Req() req: Request & { user: UserWithRolesAndPermissions },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { id, username, roles = [], permissions = [] } = req.user;
     
     const payload = {
-      sub: user.id,
-      username: user.username,
-      roles: user.roles || [],
-      permissions: user.permissions || [],
+      sub: id,
+      username,
+      roles,
+      permissions
     };
 
     const tokens = await this.authService.getTokens(payload);
@@ -71,7 +81,8 @@ export class AuthController {
   @Post('refresh')
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const refresh = req.cookies?.['refresh_token'];
-    if (!refresh) throw new UnauthorizedException('Токен обновления отсутствует');
+    if (!refresh)
+      throw new UnauthorizedException('Токен обновления отсутствует');
 
     let payload;
     try {
@@ -82,11 +93,13 @@ export class AuthController {
       throw new UnauthorizedException('Невалидный токен обновления');
     }
 
+    const { sub, username, roles = [], permissions = [] } = payload;
+
     const tokens = await this.authService.getTokens({
-      sub: payload.sub,
-      username: payload.username,
-      roles: payload.roles || [],
-      permissions: payload.permissions || [],
+      sub,
+      username,
+      roles,
+      permissions
     });
 
     res.cookie('access_token', tokens.accessToken, {

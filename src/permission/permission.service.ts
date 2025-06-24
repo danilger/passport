@@ -1,17 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { IPermissionRepository } from 'src/common/interfaces/repository.interface';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { TypeOrmPermissionRepository } from './repositories/typeorm-permission.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Permission } from './entities/permission.entity';
+import { PERMISSION_REPOSITORY } from './repositories/typeorm-permission.repository';
 
 @Injectable()
 export class PermissionService {
   constructor(
-    private readonly permissionRepository: TypeOrmPermissionRepository,
-    @InjectRepository(Permission)
-    private readonly permissionTypeormRepository: Repository<Permission>,
+    @Inject(PERMISSION_REPOSITORY)
+    private readonly permissionRepository: IPermissionRepository,
   ) {}
 
   async create(createPermissionDto: CreatePermissionDto) {
@@ -55,6 +52,18 @@ export class PermissionService {
     }
   }
 
+  async findByName(name: string) {
+    try {
+      const permission = await this.permissionRepository.findByName(name);
+      if (!permission) {
+        return null;
+      }
+      return permission;
+    } catch (error) {
+      throw new BadRequestException('Ошибка при поиске разрешения по имени');
+    }
+  }
+
   async update(id: string, updatePermissionDto: UpdatePermissionDto) {
     try {
       const { name } = updatePermissionDto;
@@ -79,15 +88,12 @@ export class PermissionService {
   async remove(id: string) {
     try {     
       // Получаем разрешение со связями
-      const permissionWithRoles = await this.permissionTypeormRepository.findOne({
-        where: { id },
-        relations: ['roles']
-      });
+      const permissionWithRoles = await this.permissionRepository.findById(id);
 
       if (permissionWithRoles && permissionWithRoles.roles) {
         // Очищаем связи с ролями
         permissionWithRoles.roles = [];
-        await this.permissionTypeormRepository.save(permissionWithRoles);
+        await this.permissionRepository.save(permissionWithRoles);
       }
 
       // Теперь можно безопасно удалить разрешение

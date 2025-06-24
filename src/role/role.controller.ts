@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  UseGuards,
+  Param,
+  Patch,
+  Post,
+  UseGuards
 } from '@nestjs/common';
-import { RoleService } from './role.service';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { RoleService } from './role.service';
 
 @ApiTags('roles')
 @Controller('role')
@@ -30,6 +30,8 @@ export class RoleController {
     description: 'Роль успешно создана',
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
+  @Permissions('can_create:role')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createRoleDto: CreateRoleDto) {
@@ -41,8 +43,8 @@ export class RoleController {
     status: 200,
     description: 'Список ролей успешно получен',
   })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_read:roles')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
   findAll() {
     return this.roleService.findAll();
@@ -55,8 +57,8 @@ export class RoleController {
     description: 'Роль успешно найдена',
   })
   @ApiResponse({ status: 404, description: 'Роль не найдена' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_read:role')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.roleService.findOne(id);
@@ -70,8 +72,8 @@ export class RoleController {
     description: 'Данные роли успешно обновлены',
   })
   @ApiResponse({ status: 404, description: 'Роль не найдена' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_update:role')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.update(id, updateRoleDto);
@@ -84,8 +86,8 @@ export class RoleController {
     description: 'Роль успешно удалена',
   })
   @ApiResponse({ status: 404, description: 'Роль не найдена' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_delete:role')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
@@ -112,8 +114,8 @@ export class RoleController {
     description: 'Разрешения успешно назначены роли',
   })
   @ApiResponse({ status: 404, description: 'Роль или разрешения не найдены' })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions('can_manage:role_permissions')
+  @UseGuards(JwtAuthGuard, PermissionGuard)
   @Post('set-permissions/:roleName')
   setPermissionToRole(
     @Param('roleName') roleName: string,

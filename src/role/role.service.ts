@@ -1,22 +1,33 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  IPermissionRepository,
+  IRoleRepository,
+} from 'src/common/interfaces/repository.interface';
+import { PERMISSION_REPOSITORY } from 'src/permission/repositories/typeorm-permission.repository';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { TypeOrmRoleRepository } from './repositories/typeorm-role.repository';
-import { TypeOrmPermissionRepository } from 'src/permission/repositories/typeorm-permission.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Role } from './entities/role.entity';
+import { ROLE_REPOSITORY } from './repositories/typeorm-role.repository';
 
 @Injectable()
 export class RoleService {
   constructor(
-    private readonly roleRepository: TypeOrmRoleRepository,
-    private readonly permissionRepository: TypeOrmPermissionRepository,
-    @InjectRepository(Role)
-    private readonly roleTypeormRepository: Repository<Role>,
+    // private readonly roleRepository: TypeOrmRoleRepository,
+    @Inject(PERMISSION_REPOSITORY)
+    private readonly permissionRepository: IPermissionRepository,
+    @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
   ) {}
 
   async create(createRoleDto: CreateRoleDto) {
+    if (createRoleDto.name === 'admin') {
+      throw new BadRequestException(
+        'Невозможно создать роль с именем "admin" - это зарезервированное имя.',
+      );
+    }
     try {
       const { name } = createRoleDto;
 
@@ -71,7 +82,10 @@ export class RoleService {
 
       return this.roleRepository.update(id, updateRoleDto);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new BadRequestException('Ошибка при обновлении роли');
@@ -81,10 +95,7 @@ export class RoleService {
   async remove(id: string) {
     try {
       // Получаем роль со всеми связями
-      const roleWithRelations = await this.roleTypeormRepository.findOne({
-        where: { id },
-        relations: ['users', 'permissions']
-      });
+      const roleWithRelations = await this.roleRepository.findById(id);
 
       if (!roleWithRelations) {
         throw new NotFoundException(`Роль с ID "${id}" не найдена`);
@@ -94,17 +105,20 @@ export class RoleService {
       if (roleWithRelations.users && roleWithRelations.users.length > 0) {
         roleWithRelations.users = [];
       }
-      
-      if (roleWithRelations.permissions && roleWithRelations.permissions.length > 0) {
+
+      if (
+        roleWithRelations.permissions &&
+        roleWithRelations.permissions.length > 0
+      ) {
         roleWithRelations.permissions = [];
       }
 
       // Сохраняем роль с очищенными связями
-      await this.roleTypeormRepository.save(roleWithRelations);
+      await this.roleRepository.save(roleWithRelations);
 
       // Теперь можно безопасно удалить роль
       const deleteResult = await this.roleRepository.delete(id);
-      
+
       if (!deleteResult) {
         throw new BadRequestException(`Не удалось удалить роль с ID "${id}"`);
       }
@@ -115,9 +129,9 @@ export class RoleService {
         throw error;
       }
       throw new BadRequestException(
-        error instanceof BadRequestException 
-          ? error.message 
-          : `Ошибка при удалении роли: ${error.message}`
+        error instanceof BadRequestException
+          ? error.message
+          : `Ошибка при удалении роли: ${error.message}`,
       );
     }
   }
@@ -125,26 +139,32 @@ export class RoleService {
   async setPermissionToRole(roleName: string, permissions: string[]) {
     try {
       const role = await this.roleRepository.findByName(roleName);
+
       if (!role) {
         throw new NotFoundException(`Роль с именем "${roleName}" не найдена`);
       }
 
-      const permissionsArray = await this.permissionRepository.findByNames(permissions);
+      const permissionsArray =
+        await this.permissionRepository.findByNames(permissions);
+
       if (!permissionsArray) {
-        throw new NotFoundException(`Разрешения с именами "${permissions}" не найдены`);
+        throw new NotFoundException(
+          `Разрешения с именами "${permissions}" не найдены`,
+        );
       }
 
       // Инициализируем массив разрешений, если он не существует
-      if (!role.permissions) {
+      if (!role?.permissions) {
         role.permissions = [];
       }
 
       // Обновляем список разрешений
       role.permissions = [...role.permissions, ...permissionsArray];
-      
+
       // Убираем дубликаты по id
-      role.permissions = role.permissions.filter((permission, index, self) =>
-        index === self.findIndex((p) => p.id === permission.id)
+      role.permissions = role.permissions.filter(
+        (permission, index, self) =>
+          index === self.findIndex((p) => p.id === permission.id),
       );
 
       return this.roleRepository.save(role);
