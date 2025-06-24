@@ -5,6 +5,7 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -38,6 +39,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @HttpCode(200)
   async login(
     @Req() req: Request & { user: UserWithRolesAndPermissions },
     @Res({ passthrough: true }) res: Response,
@@ -53,18 +55,20 @@ export class AuthController {
 
     const tokens = await this.authService.getTokens(payload);
 
+    const isTestEnvironment = process.env.NODE_ENV === 'test';
+
     res.cookie('access_token', tokens.accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: !isTestEnvironment,
+      sameSite: isTestEnvironment ? 'lax' : 'strict',
       maxAge: 15 * 60 * 1000,
       path: '/',
     });
 
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      secure: !isTestEnvironment,
+      sameSite: isTestEnvironment ? 'lax' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/auth/refresh',
     });

@@ -8,7 +8,14 @@ import { Request } from 'express';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
-      jwtFromRequest: (req: Request) => req.cookies['access_token'],
+      jwtFromRequest: (req: Request) => {
+        if (!req.cookies) {
+          return null;
+        }
+        const token = req.cookies['access_token'];
+
+        return token || null;
+      },
       secretOrKey: process.env.JWT_ACCESS_SECRET,
     });
   }
@@ -17,6 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * validate работает только с payload из JWT токена и не делает никаких запросов к базе данных.
    */
   async validate(payload: any) {
+    console.log('Validating payload:', payload);
     return {
       userId: payload.sub,
       id: payload.id,
