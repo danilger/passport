@@ -17,6 +17,7 @@ async function bootstrap() {
       'API документация для системы управления пользователями, ролями и разрешениями',
     )
     .setVersion('1.0')
+    .addTag('app', 'Общая информация о сервисе')
     .addTag('auth', 'Аутентификация и авторизация')
     .addTag('users', 'Управление пользователями')
     .addTag('roles', 'Управление ролями')
@@ -25,7 +26,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
   app.use(cookieParser());
   

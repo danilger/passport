@@ -1,0 +1,10 @@
+PORT=5001
+HOST=localhost
+
+TEST_DB_HOST=localhost
+TEST_DB_PORT=5434
+TEST_DB_USER=postgres
+TEST_DB_PASSWORD=postgres
+
+JWT_ACCESS_SECRET=test-access-secret-key
+JWT_REFRESH_SECRET=test-refresh-secret-key
