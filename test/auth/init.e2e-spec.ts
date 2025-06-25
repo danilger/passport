@@ -5,7 +5,7 @@ import { PermissionService } from '../../src/permission/permission.service';
 import { RoleService } from '../../src/role/role.service';
 import { UserService } from '../../src/user/user.service';
 
-describe('System Initialization (e2e)', () => {
+describe('Инициализация системы (e2e)', () => {
   let app: INestApplication;
   let userService: UserService;
   let roleService: RoleService;
@@ -30,8 +30,8 @@ describe('System Initialization (e2e)', () => {
     await moduleFixture.close();
   });
 
-  describe('Default Admin User', () => {
-    it('should have admin user in database', async () => {
+  describe('Административный пользователь по умолчанию', () => {
+    it('должен иметь админа в базе данных', async () => {
       const admin = await userService.findByUsername('admin');
       expect(admin).toBeDefined();
       expect(admin).not.toBeNull();
@@ -40,7 +40,7 @@ describe('System Initialization (e2e)', () => {
       }
     });
 
-    it('should have admin role', async () => {
+    it('должен иметь роль админа', async () => {
       const admin = await userService.findByUsername('admin');
       expect(admin).toBeDefined();
       expect(admin).not.toBeNull();
@@ -52,8 +52,8 @@ describe('System Initialization (e2e)', () => {
     });
   });
 
-  describe('Default Roles', () => {
-    it('should have admin role in database', async () => {
+  describe('Роли по умолчанию', () => {
+    it('должна быть роль админа в базе данных', async () => {
       const roles = await roleService.findAll();
       const adminRole = roles.find(role => role.name === 'admin');
       expect(adminRole).toBeDefined();
@@ -63,8 +63,8 @@ describe('System Initialization (e2e)', () => {
     });
   });
 
-  describe('Default Permissions', () => {
-    it('should have basic permissions in database', async () => {
+  describe('Разрешения по умолчанию', () => {
+    it('должны быть базовые разрешения в базе данных', async () => {
       const permissions = await permissionService.findAll();
       expect(permissions.length).toBeGreaterThan(0);
       
@@ -82,7 +82,7 @@ describe('System Initialization (e2e)', () => {
       });
     });
 
-    it('should have permissions assigned to admin role', async () => {
+    it('должны быть разрешения назначены роли админа', async () => {
       const roles = await roleService.findAll();
       const adminRole = roles.find(role => role.name === 'admin');
       expect(adminRole).toBeDefined();

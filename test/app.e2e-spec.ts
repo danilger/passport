@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 
-describe('AppController (e2e)', () => {
+describe('Контроллер приложения (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -19,7 +19,7 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  it('/api (GET)', () => {
+  it('GET /api должен вернуть информацию о сервисе', () => {
     return request(app.getHttpServer())
       .get('/api')
       .expect(200)
