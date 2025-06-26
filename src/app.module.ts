@@ -12,7 +12,7 @@ import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
@@ -24,8 +24,8 @@ import { AuthModule } from './auth/auth.module';
         username: configService.get('DB_USER'),
         password: configService.get('DB_PASSWORD'),
         database: 'postgres',
-        autoLoadEntities: true, // автоматически загружает сущности
-        synchronize: false, // ❗️Не использовать в production true
+        autoLoadEntities: process.env.NODE_ENV === 'test', // автоматически загружает сущности только в тестовом окружении
+        synchronize: process.env.NODE_ENV === 'test', // синхронизация схемы только в тестовом окружении
         entities: [join(__dirname, '**', '*.entity.{ts,js}')],
         migrations: [join(__dirname, 'migrations', '**', '*.{ts,js}')],
         seeds: [join(__dirname, 'seeds', '**', '*.{ts,js}')],

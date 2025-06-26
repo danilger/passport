@@ -60,7 +60,7 @@ describe('Система аутентификации (e2e)', () => {
         expect.objectContaining({ name: 'can_create:user' }),
       );
       expect(permissions).toContainEqual(
-        expect.objectContaining({ name: 'can_read:users' }),
+        expect.objectContaining({ name: 'can_read:user' }),
       );
     });
   });

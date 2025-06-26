@@ -24,13 +24,13 @@ export class Api  {
     async fetch(endpoint: string, options: RequestInit = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     if (this.cookies && Object.keys(this.cookies).length > 0) {
-      console.log('Sending cookies:', this.cookies);
+      // console.log('Sending cookies:', this.cookies);
       if (!options.headers) {
         options.headers = {};
       }
       if (options.headers && typeof options.headers === 'object') {
         (options.headers as Record<string, string>)['cookie'] = `access_token=${this.cookies.access_token}`;
-        console.log('Cookie header:', (options.headers as Record<string, string>)['cookie']);
+        // console.log('Cookie header:', (options.headers as Record<string, string>)['cookie']);
       }
     }
 
@@ -39,7 +39,7 @@ export class Api  {
     // Сохраняем cookies из ответа
     const setCookieHeader = response.headers.get('set-cookie');
     if (setCookieHeader) {
-      console.log('Received Set-Cookie:', setCookieHeader);
+      // console.log('Received Set-Cookie:', setCookieHeader);
       const cookieStrings = setCookieHeader.split(',').map(str => str.trim());
       for (const cookieStr of cookieStrings) {
         const [keyValue] = cookieStr.split(';');
@@ -50,7 +50,7 @@ export class Api  {
           }
         }
       }
-      console.log('Updated cookies:', this.cookies);
+      // console.log('Updated cookies:', this.cookies);
     }
 
     if (response.status === 401) {

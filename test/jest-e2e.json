@@ -9,5 +9,23 @@
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/../src/$1",
     "^test/(.*)$": "<rootDir>/$1"
-  }
+  },
+  "verbose": true,
+  "detectOpenHandles": true,
+  "forceExit": true,
+  "reporters": [
+    "default",
+    ["jest-summary-reporter", {"failuresOnly": true}]
+  ],
+  "setupFilesAfterEnv": ["jest-extended"],
+  "testTimeout": 30000,
+  "bail": false,
+  "collectCoverage": true,
+  "coverageReporters": ["text", "lcov", "json", "html"],
+  "coverageDirectory": "../coverage/e2e",
+  "displayName": {
+    "name": "E2E Tests",
+    "color": "blue"
+  },
+  "silent": true
 }

@@ -1,0 +1,811 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "AppController_getApiInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Возвращает краткое описание сервиса и ссылку на документацию",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Passport Service"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "documentation": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить информацию о сервисе",
+        "tags": [
+          "app"
+        ]
+      }
+    },
+    "/user": {
+      "post": {
+        "operationId": "UserController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Пользователь успешно создан"
+          },
+          "400": {
+            "description": "Некорректные данные"
+          }
+        },
+        "summary": "Создание нового пользователя",
+        "tags": [
+          "users"
+        ]
+      },
+      "get": {
+        "operationId": "UserController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список пользователей успешно получен"
+          },
+          "403": {
+            "description": "Нет доступа"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Получение списка всех пользователей",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "operationId": "UserController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID пользователя",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь успешно найден"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Получение пользователя по ID",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "UserController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID пользователя",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Данные пользователя успешно обновлены"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Обновление данных пользователя",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID пользователя",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь успешно удален"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Удаление пользователя",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/user/set-roles/{id}": {
+      "post": {
+        "operationId": "UserController_setRoleToUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID пользователя",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Массив названий ролей",
+                    "example": [
+                      "admin",
+                      "user"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Роли успешно назначены пользователю"
+          },
+          "404": {
+            "description": "Пользователь или роли не найдены"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Назначение ролей пользователю",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/user/change-password": {
+      "post": {
+        "operationId": "UserController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/role": {
+      "post": {
+        "operationId": "RoleController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Роль успешно создана"
+          },
+          "400": {
+            "description": "Некорректные данные"
+          }
+        },
+        "summary": "Создание новой роли",
+        "tags": [
+          "roles"
+        ]
+      },
+      "get": {
+        "operationId": "RoleController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список ролей успешно получен"
+          }
+        },
+        "summary": "Получение списка всех ролей",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/role/{id}": {
+      "get": {
+        "operationId": "RoleController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID роли",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Роль успешно найдена"
+          },
+          "404": {
+            "description": "Роль не найдена"
+          }
+        },
+        "summary": "Получение роли по ID",
+        "tags": [
+          "roles"
+        ]
+      },
+      "patch": {
+        "operationId": "RoleController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID роли",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Данные роли успешно обновлены"
+          },
+          "404": {
+            "description": "Роль не найдена"
+          }
+        },
+        "summary": "Обновление данных роли",
+        "tags": [
+          "roles"
+        ]
+      },
+      "delete": {
+        "operationId": "RoleController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID роли",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Роль успешно удалена"
+          },
+          "404": {
+            "description": "Роль не найдена"
+          }
+        },
+        "summary": "Удаление роли",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/role/set-permissions/{roleName}": {
+      "post": {
+        "operationId": "RoleController_setPermissionToRole",
+        "parameters": [
+          {
+            "name": "roleName",
+            "required": true,
+            "in": "path",
+            "description": "Название роли",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "permissions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Массив названий разрешений",
+                    "example": [
+                      "can_read",
+                      "can_write"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Разрешения успешно назначены роли"
+          },
+          "404": {
+            "description": "Роль или разрешения не найдены"
+          }
+        },
+        "summary": "Назначение разрешений роли",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/permission": {
+      "post": {
+        "operationId": "PermissionController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePermissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Разрешение успешно создано"
+          },
+          "400": {
+            "description": "Некорректные данные"
+          }
+        },
+        "summary": "Создание нового разрешения",
+        "tags": [
+          "permissions"
+        ]
+      },
+      "get": {
+        "operationId": "PermissionController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список разрешений успешно получен"
+          }
+        },
+        "summary": "Получение списка всех разрешений",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permission/{id}": {
+      "get": {
+        "operationId": "PermissionController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID разрешения",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Разрешение успешно найдено"
+          },
+          "404": {
+            "description": "Разрешение не найдено"
+          }
+        },
+        "summary": "Получение разрешения по ID",
+        "tags": [
+          "permissions"
+        ]
+      },
+      "patch": {
+        "operationId": "PermissionController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID разрешения",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePermissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Данные разрешения успешно обновлены"
+          },
+          "404": {
+            "description": "Разрешение не найдено"
+          }
+        },
+        "summary": "Обновление данных разрешения",
+        "tags": [
+          "permissions"
+        ]
+      },
+      "delete": {
+        "operationId": "PermissionController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID разрешения",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Разрешение успешно удалено"
+          },
+          "404": {
+            "description": "Разрешение не найдено"
+          }
+        },
+        "summary": "Удаление разрешения",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успешный вход в систему. Устанавливаются куки access_token и refresh_token"
+          },
+          "401": {
+            "description": "Неверные учетные данные"
+          }
+        },
+        "summary": "Вход в систему",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Токен успешно обновлен. Устанавливаются новые куки"
+          },
+          "401": {
+            "description": "Невалидный refresh token"
+          }
+        },
+        "summary": "Обновление токена",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Успешный выход. Куки удалены"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Выход из системы",
+        "tags": [
+          "auth"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Passport API",
+    "description": "API документация для системы управления пользователями, ролями и разрешениями\n\nСпецификация OpenAPI доступна в формате JSON: [openapi.json](/api/openapi.json)",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "app",
+      "description": "Общая информация о сервисе"
+    },
+    {
+      "name": "auth",
+      "description": "Аутентификация и авторизация"
+    },
+    {
+      "name": "users",
+      "description": "Управление пользователями"
+    },
+    {
+      "name": "roles",
+      "description": "Управление ролями"
+    },
+    {
+      "name": "permissions",
+      "description": "Управление разрешениями"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "access_token"
+      }
+    },
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "john_doe",
+            "minLength": 3
+          },
+          "email": {
+            "type": "string",
+            "description": "Уникальный email пользователя",
+            "example": "john_doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль пользователя",
+            "example": "password123",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "password"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "Статус активности пользователя",
+            "example": true
+          },
+          "isVerified": {
+            "type": "boolean",
+            "description": "Статус верификации пользователя",
+            "example": true
+          }
+        }
+      },
+      "UpdatePasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "description": "Новый пароль",
+            "example": "newPassword123",
+            "minLength": 6
+          },
+          "previousPassword": {
+            "type": "string",
+            "description": "Старый пароль",
+            "example": "newPassword123",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "newPassword",
+          "previousPassword"
+        ]
+      },
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Название роли",
+            "example": "admin",
+            "minLength": 3
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreatePermissionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Название разрешения",
+            "example": "can_read",
+            "minLength": 3
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdatePermissionDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "john_doe"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль пользователя",
+            "example": "password123"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      }
+    }
+  }
+}

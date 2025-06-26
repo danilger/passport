@@ -23,9 +23,11 @@ export class RoleService {
   ) {}
 
   async create(createRoleDto: CreateRoleDto) {
-    if (createRoleDto.name === 'admin') {
+    const adminRole = await this.roleRepository.findByName('admin');
+
+    if (createRoleDto.name === 'admin' && adminRole) {
       throw new BadRequestException(
-        'Невозможно создать роль с именем "admin" - это зарезервированное имя.',
+        'Невозможно создать роль с именем "admin" - в системе может быть только одна роль с таким именем.',
       );
     }
     try {

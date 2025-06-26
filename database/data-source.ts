@@ -15,10 +15,11 @@ export default new DataSource({
   database: 'postgres',
   synchronize: false, // Отключение автоматической синхронизации схемы
   dropSchema: false, // Запрет на удаление схемы при запуске
-  logging: false, // Отключение логгирования запросов
-  logger: 'file', // Тип логгера (если включено)
+  logging: true, // Включение логгирования запросов
+  logger: 'advanced-console', // Тип логгера (если включено)
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')], // Пути к сущностям
-  migrations: [join(__dirname, '..', 'migrations', '**', '*.{ts,js}')], // Пути к миграциям
+  migrations: [join(__dirname, '..', 'database', 'migrations', '**', '*.{ts,js}')], // Пути к миграциям
   subscribers: [join(__dirname, '..', 'subscriber', '**', '*.{ts,js}')], // Пути к подписчикам событий
   migrationsTableName: 'migrations', // Название таблицы для хранения миграций
+  migrationsRun: true
 });
