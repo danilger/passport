@@ -6,6 +6,7 @@ import { AppModule } from '../src/app.module';
 import { authTestSuit } from './auth/auth.e2e-spec';
 import { userOperationsTestSuit } from './user/user-operations.e2e-spec';
 import { roleCrudTestSuit } from './role/role-crud.e2e-spec';
+import { permissionCrudTestSuit } from './permission/permission-crud.e2e-spec';
 import { cleanupTestEnvironment } from './utils/cleanup';
 import { Api } from './utils/api';
 import { config } from 'dotenv';
@@ -82,9 +83,15 @@ describe('E2E Тесты', () => {
   describe('Роли', () => {
     roleCrudTestSuit(api);
   });
+  
+  // 4. Тесты CRUD операций с разрешениями
+  describe('Разрешения', () => {
+    permissionCrudTestSuit(api);
+  });
 
-  // 4. Тесты операций с пользователями
-  // describe('Операции с пользователями', () => {
-  //   userOperationsTestSuit(api);
-  // });
+  // 5. Тесты операций с пользователями
+  describe('Операции с пользователями', () => {
+    userOperationsTestSuit(api);
+  });
+
 });

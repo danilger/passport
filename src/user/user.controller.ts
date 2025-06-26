@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -127,6 +129,7 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Пользователь или роли не найдены' })
   @Post('set-roles/:id')
+  @HttpCode(HttpStatus.OK)
   @Permissions('can_manage:user_roles')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   async setRoleToUser(@Param('id') id: string, @Body('roles') roles: string[]) {
@@ -135,6 +138,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
+  @HttpCode(HttpStatus.OK)
   @Permissions('can_change:own_password')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   async changePassword(

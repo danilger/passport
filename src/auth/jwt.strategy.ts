@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * validate работает только с payload из JWT токена и не делает никаких запросов к базе данных.
    */
   async validate(payload: any) {
-    console.log('Validating payload:', payload);
+
     return {
       userId: payload.sub,
       id: payload.id,

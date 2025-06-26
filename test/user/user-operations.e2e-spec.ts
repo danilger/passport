@@ -21,9 +21,8 @@ export const userOperationsTestSuit = ( api:Api) => {
 
   it('должен создать пользователя', async () => {
         // Логин как админ
-        const loginResponse = await api.login('admin', 'admin');
-        expect(loginResponse.status).toBe(200);
-    
+        await api.login('admin', 'admin');
+
         // Создаем тестового пользователя
         const createUserResponse = await api.fetch('/user', {
           method: 'POST',
@@ -37,6 +36,10 @@ export const userOperationsTestSuit = ( api:Api) => {
     
         const user = await createUserResponse.json();
         userId = user.id;
+
+        console.log(['userId', userId]);
+
+        expect(createUserResponse.status).toBe(201);
   })
 
   it('должен назначить роли пользователю', async () => {
@@ -48,6 +51,8 @@ export const userOperationsTestSuit = ( api:Api) => {
       }),
     });
 
+    console.log(['response', response.status]);
+
     expect(response.status).toBe(200);
 
     // Проверяем что роли назначены
@@ -56,7 +61,7 @@ export const userOperationsTestSuit = ( api:Api) => {
     });
     const updatedUser = await userResponse.json();
     expect(updatedUser.roles).toBeDefined();
-    expect(updatedUser.roles.some((role) => role.name === 'user')).toBe(true);
+    expect(updatedUser.roles.some((role: { name: string }) => role.name === 'user')).toBe(true);
   });
 
   it('должен вернуть ошибку при назначении несуществующей роли', async () => {
@@ -72,6 +77,7 @@ export const userOperationsTestSuit = ( api:Api) => {
   });
 
   it('должен изменить пароль пользователя', async () => {
+    await api.login('testuser2', 'password123');
     // Сначала логинимся как тестовый пользователь
     const loginResponse = await api.login('testuser2', 'password123');
     expect(loginResponse.status).toBe(200);
@@ -85,7 +91,7 @@ export const userOperationsTestSuit = ( api:Api) => {
       }),
     });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200);
 
     // Проверяем что можем залогиниться с новым паролем
     const newLoginResponse = await api.login('testuser2', 'newpassword123');

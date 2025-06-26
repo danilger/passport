@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
   UseGuards,
   HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -39,7 +40,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   async login(
     @Req() req: Request & { user: UserWithRolesAndPermissions },
     @Res({ passthrough: true }) res: Response,

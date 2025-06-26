@@ -261,7 +261,7 @@
           }
         },
         "responses": {
-          "201": {
+          "200": {
             "description": ""
           }
         },
@@ -757,7 +757,7 @@
           "name": {
             "type": "string",
             "description": "Название роли",
-            "example": "admin",
+            "example": "user",
             "minLength": 3
           }
         },
@@ -775,7 +775,7 @@
           "name": {
             "type": "string",
             "description": "Название разрешения",
-            "example": "can_read",
+            "example": "can_read:users",
             "minLength": 3
           }
         },

@@ -4,7 +4,7 @@ import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 export class CreateRoleDto {
   @ApiProperty({
     description: 'Название роли',
-    example: 'admin',
+    example: 'user',
     minLength: 3
   })
   @IsString()

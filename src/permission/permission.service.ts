@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { IPermissionRepository } from 'src/common/interfaces/repository.interface';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
@@ -15,9 +20,12 @@ export class PermissionService {
     try {
       const { name } = createPermissionDto;
 
-      const existingPermission = await this.permissionRepository.findByName(name);
+      const existingPermission =
+        await this.permissionRepository.findByName(name);
       if (existingPermission) {
-        throw new BadRequestException('Разрешение с таким именем уже существует');
+        throw new BadRequestException(
+          'Разрешение с таким именем уже существует',
+        );
       }
 
       return this.permissionRepository.create({ name });
@@ -70,15 +78,21 @@ export class PermissionService {
       await this.findOne(id);
 
       if (name) {
-        const existingPermission = await this.permissionRepository.findByName(name);
+        const existingPermission =
+          await this.permissionRepository.findByName(name);
         if (existingPermission && existingPermission.id !== id) {
-          throw new BadRequestException('Разрешение с таким именем уже существует');
+          throw new BadRequestException(
+            'Разрешение с таким именем уже существует',
+          );
         }
       }
 
       return this.permissionRepository.update(id, updatePermissionDto);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new BadRequestException('Ошибка при обновлении разрешения');
@@ -86,14 +100,19 @@ export class PermissionService {
   }
 
   async remove(id: string) {
-    try {     
+    try {
       // Получаем разрешение со связями
       const permissionWithRoles = await this.permissionRepository.findById(id);
+      
+      if (!permissionWithRoles) {
+        throw new NotFoundException(`Разрешение с ID "${id}" не найдено`);
+      }
 
-      if (permissionWithRoles && permissionWithRoles.roles) {
-        // Очищаем связи с ролями
-        permissionWithRoles.roles = [];
-        await this.permissionRepository.save(permissionWithRoles);
+      if (permissionWithRoles.roles?.length > 0) {
+        await this.permissionRepository.save({
+          ...permissionWithRoles,
+          roles: [],
+        });
       }
 
       // Теперь можно безопасно удалить разрешение
