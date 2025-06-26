@@ -58,26 +58,26 @@ describe('E2E Тесты', () => {
   });
 
   // 1. Базовые тесты приложения
-  // describe('Контроллер приложения', () => {
-  //   it('GET /api должен вернуть информацию о сервисе', () => {
-  //     return request(app.getHttpServer())
-  //       .get('/api')
-  //       .expect(200)
-  //       .expect((res) => {
-  //         expect(res.body).toEqual({
-  //           name: 'Passport Service',
-  //           description:
-  //             'Сервис управления пользователями, ролями и разрешениями',
-  //           documentation: '/api/docs',
-  //         });
-  //       });
-  //   });
-  // });
+  describe('Контроллер приложения', () => {
+    it('GET /api должен вернуть информацию о сервисе', () => {
+      return request(app.getHttpServer())
+        .get('/api')
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual({
+            name: 'Passport Service',
+            description:
+              'Сервис управления пользователями, ролями и разрешениями',
+            documentation: '/api/docs',
+          });
+        });
+    });
+  });
 
   // 2. Тесты аутентификации
-  // describe('Аутентификация', () => {
-  //   authTestSuit(app, api);
-  // });
+  describe('Аутентификация', () => {
+    authTestSuit(app, api);
+  });
 
   // 3. Тесты CRUD операций с ролями
   describe('Роли', () => {

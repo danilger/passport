@@ -6,6 +6,13 @@ import { Api } from '../utils/api';
 config({ path: '.env.test', override: true });
 
 export const authTestSuit = (app: INestApplication, api: Api) => {
+  it('должен корректно обрабатывать запрос /auth/login без options.headers', async () => {
+    const response = await api.fetch('/auth/login');
+    
+    // Проверяем что запрос выполнился (даже если вернул 401, это нормально)
+    expect(response).toBeDefined();
+    expect(response instanceof Response).toBe(true);
+  });
 
   it('должен успешно войти как admin', async () => {
     const loginResponse = await api.login('admin', 'admin');
