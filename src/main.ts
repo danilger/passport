@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,9 +12,28 @@ async function bootstrap() {
   
   // Создаем приложение с настроенным логгером
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
-    bufferLogs: true
+    logger: ['error', 'warn', 'log'],
+    bufferLogs: false
   });
+
+  // Добавляем глобальную валидацию
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      stopAtFirstError: true,
+      validationError: {
+        target: false,
+        value: false
+      },
+      transformOptions: {
+        enableImplicitConversion: true,
+        exposeDefaultValues: true
+      },
+      disableErrorMessages: false
+    }),
+  );
   
   // Включаем глобальную сериализацию для автоматического исключения @Exclude() полей из ответов
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -56,10 +75,6 @@ async function bootstrap() {
   
   logger.log(`🚀 Application is running on: http://localhost:${port}`);
   logger.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
-  
-  if (process.env.NODE_ENV === 'development') {
-    logger.debug('🛠️ Application running in development mode');
-  }
 }
 
 bootstrap().catch((error) => {

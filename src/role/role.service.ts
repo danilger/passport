@@ -23,12 +23,12 @@ export class RoleService {
   ) {}
 
   async create(createRoleDto: CreateRoleDto) {
-    const adminRole = await this.roleRepository.findByName('admin');
-
-    if (createRoleDto.name === 'admin' && adminRole) {
-      throw new BadRequestException(
-        'Невозможно создать роль с именем "admin" - в системе может быть только одна роль с таким именем.',
-      );
+    if (createRoleDto.name === 'admin') {
+      const adminRole = await this.roleRepository.findByName('admin');
+      if (adminRole)
+        throw new BadRequestException(
+          'Невозможно создать роль с именем "admin" - в системе может быть только одна роль с таким именем.',
+        );
     }
     try {
       const { name } = createRoleDto;

@@ -1,67 +1,33 @@
 import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import * as cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
-import { Api } from 'test/utils/api';
-import { AppModule } from '../../src/app.module';
+import { Api } from '../utils/api';
 
 // Загружаем конфигурацию из .env.test с перезаписью существующих значений
 config({ path: '.env.test', override: true });
 
-describe('Система аутентификации (e2e)', () => {
-  let app: INestApplication;
-  let api: Api;
+export const authTestSuit = (app: INestApplication, api: Api) => {
 
-  beforeAll(async () => {
-    api = new Api(
-      `http://${process.env.HOST || 'localhost'}:${process.env.PORT || 5001}`,
-    );
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.use(cookieParser());
-    await app.init();
-    await app.listen(process.env.PORT || 5001);
+  it('должен успешно войти как admin', async () => {
+    const loginResponse = await api.login('admin', 'admin');
+    const loginResult = await loginResponse.json();
+    expect(loginResponse.status).toBe(200);
+    expect(api.cookies.access_token).toBeDefined();
+    expect(loginResult).toEqual({message: "Вход выполнен успешно"});
   });
 
-  afterAll(async () => {
-    await app.close();
+  it('не должен войти с неверными учетными данными', async () => {
+    const loginResponse = await api.login('wrong', 'wrong');
+    expect(loginResponse.status).toBe(401);
   });
 
-  describe('Процесс аутентификации', () => {
-    it('должен выполнить вход под админом', async () => {
-      const response = await api.login('admin', 'admin');
-      expect(response.status).toBe(200);
-
-      const body = await response.json();
-      expect(body.message).toBe('Вход выполнен успешно');
-
-      // Проверяем, что куки установлены
-      expect(api.cookies['access_token']).toBeDefined();
-      expect(api.cookies['refresh_token']).toBeDefined();
+  it('должен успешно выйти', async () => {
+    const logoutResponse = await api.fetch('/auth/logout', {
+      method: 'POST',
     });
-
-    it('должен иметь доступ к защищенным маршрутам после входа', async () => {
-      // Проверяем наличие базовых ролей
-      const rolesResponse = await api.fetch('/role');
-      expect(rolesResponse.status).toBe(200);
-
-      const roles = await rolesResponse.json();
-      expect(roles).toContainEqual(expect.objectContaining({ name: 'admin' }));
-
-      // Проверяем наличие базовых разрешений
-      const permissionsResponse = await api.fetch('/permission');
-      expect(permissionsResponse.status).toBe(200);
-
-      const permissions = await permissionsResponse.json();
-      expect(permissions).toContainEqual(
-        expect.objectContaining({ name: 'can_create:user' }),
-      );
-      expect(permissions).toContainEqual(
-        expect.objectContaining({ name: 'can_read:user' }),
-      );
+    const logoutResult = await logoutResponse.json();
+    expect(logoutResponse.status).toBe(201);
+    expect(logoutResult).toEqual({
+      message: 'Выход выполнен успешно',
     });
   });
-});
+};

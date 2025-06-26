@@ -30,6 +30,10 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.findByUsername(createUserDto.username);
+    if (existingUser) {
+      throw new BadRequestException('Пользователь с таким именем уже существует');
+    }
     try {
       return this.repository.create(createUserDto);
     } catch (error) {
