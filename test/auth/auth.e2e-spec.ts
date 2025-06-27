@@ -32,7 +32,7 @@ export const authTestSuit = (app: INestApplication, api: Api) => {
       method: 'POST',
     });
     const logoutResult = await logoutResponse.json();
-    expect(logoutResponse.status).toBe(201);
+    expect(logoutResponse.status).toBe(200);
     expect(logoutResult).toEqual({
       message: 'Выход выполнен успешно',
     });

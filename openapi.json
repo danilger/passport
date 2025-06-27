@@ -60,7 +60,7 @@
         },
         "summary": "Создание нового пользователя",
         "tags": [
-          "users"
+          "user"
         ]
       },
       "get": {
@@ -81,7 +81,34 @@
         ],
         "summary": "Получение списка всех пользователей",
         "tags": [
-          "users"
+          "user"
+        ]
+      }
+    },
+    "/user/me": {
+      "get": {
+        "operationId": "UserController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Информация о себе успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserMeResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Получение информации о себе",
+        "tags": [
+          "user"
         ]
       }
     },
@@ -114,7 +141,7 @@
         ],
         "summary": "Получение пользователя по ID",
         "tags": [
-          "users"
+          "user"
         ]
       },
       "patch": {
@@ -155,7 +182,7 @@
         ],
         "summary": "Обновление данных пользователя",
         "tags": [
-          "users"
+          "user"
         ]
       },
       "delete": {
@@ -186,7 +213,7 @@
         ],
         "summary": "Удаление пользователя",
         "tags": [
-          "users"
+          "user"
         ]
       }
     },
@@ -242,7 +269,7 @@
         ],
         "summary": "Назначение ролей пользователю",
         "tags": [
-          "users"
+          "user"
         ]
       }
     },
@@ -262,11 +289,31 @@
         },
         "responses": {
           "200": {
+            "description": "Пароль успешно изменен"
+          }
+        },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
+        "summary": "Смена пароля",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/test/me": {
+      "get": {
+        "operationId": "TestController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
             "description": ""
           }
         },
         "tags": [
-          "users"
+          "Test"
         ]
       }
     },
@@ -292,6 +339,11 @@
             "description": "Некорректные данные"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Создание новой роли",
         "tags": [
           "roles"
@@ -305,6 +357,11 @@
             "description": "Список ролей успешно получен"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Получение списка всех ролей",
         "tags": [
           "roles"
@@ -333,6 +390,11 @@
             "description": "Роль не найдена"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Получение роли по ID",
         "tags": [
           "roles"
@@ -369,6 +431,11 @@
             "description": "Роль не найдена"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Обновление данных роли",
         "tags": [
           "roles"
@@ -395,6 +462,11 @@
             "description": "Роль не найдена"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Удаление роли",
         "tags": [
           "roles"
@@ -446,6 +518,11 @@
             "description": "Роль или разрешения не найдены"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Назначение разрешений роли",
         "tags": [
           "roles"
@@ -474,6 +551,11 @@
             "description": "Некорректные данные"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Создание нового разрешения",
         "tags": [
           "permissions"
@@ -487,6 +569,11 @@
             "description": "Список разрешений успешно получен"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Получение списка всех разрешений",
         "tags": [
           "permissions"
@@ -515,6 +602,11 @@
             "description": "Разрешение не найдено"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Получение разрешения по ID",
         "tags": [
           "permissions"
@@ -551,6 +643,11 @@
             "description": "Разрешение не найдено"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Обновление данных разрешения",
         "tags": [
           "permissions"
@@ -577,6 +674,11 @@
             "description": "Разрешение не найдено"
           }
         },
+        "security": [
+          {
+            "cookie": []
+          }
+        ],
         "summary": "Удаление разрешения",
         "tags": [
           "permissions"
@@ -666,7 +768,7 @@
       "description": "Аутентификация и авторизация"
     },
     {
-      "name": "users",
+      "name": "user",
       "description": "Управление пользователями"
     },
     {
@@ -713,6 +815,28 @@
           "username",
           "email",
           "password"
+        ]
+      },
+      "UserMeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "roles"
         ]
       },
       "UpdateUserDto": {

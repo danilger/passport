@@ -9,10 +9,11 @@ import {
 } from './repositories/typeorm-user.repository';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { TestController } from './test.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), RoleModule, forwardRef(() => AuthModule)],
-  controllers: [UserController],
+  controllers: [UserController, TestController],
   providers: [
     UserService,
     { provide: USER_REPOSITORY, useClass: TypeOrmUserRepository },

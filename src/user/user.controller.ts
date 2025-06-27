@@ -17,18 +17,20 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
-  ApiTags,
+  ApiTags
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { UserMeResponse } from './dto/userme-response';
 
-@ApiTags('users')
+
+
+@ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -59,6 +61,20 @@ export class UserController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   findAll() {
     return this.userService.findAll();
+  }
+
+  @ApiOperation({ summary: 'Получение информации о себе' })
+  @ApiCookieAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Информация о себе успешно получена',
+    type: UserMeResponse
+  })
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async getMe(@Req() req: Request & { user: { userId: string; username: string } }) {
+    return await this.userService.getMe(req);
   }
 
   @ApiOperation({ summary: 'Получение пользователя по ID' })
@@ -136,7 +152,13 @@ export class UserController {
     return this.userService.setRoleToUser(id, roles);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Смена пароля' })
+  @ApiCookieAuth()
+  @ApiBody({ type: UpdatePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Пароль успешно изменен',
+  })
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @Permissions('can_change:own_password')
@@ -147,4 +169,6 @@ export class UserController {
   ) {
     return await this.userService.changePassword(newPassword, req);
   }
+
+
 }

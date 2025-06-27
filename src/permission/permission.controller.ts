@@ -5,7 +5,7 @@ import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiCookieAuth } from '@nestjs/swagger';
 
 @ApiTags('permissions')
 @Controller('permission')
@@ -13,6 +13,7 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @ApiOperation({ summary: 'Создание нового разрешения' })
+  @ApiCookieAuth()
   @ApiBody({ type: CreatePermissionDto })
   @ApiResponse({
     status: 201,
@@ -28,6 +29,7 @@ export class PermissionController {
   }
 
   @ApiOperation({ summary: 'Получение списка всех разрешений' })
+  @ApiCookieAuth()
   @ApiResponse({
     status: 200,
     description: 'Список разрешений успешно получен',
@@ -40,6 +42,7 @@ export class PermissionController {
   }
 
   @ApiOperation({ summary: 'Получение разрешения по ID' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'id', description: 'ID разрешения' })
   @ApiResponse({
     status: 200,
@@ -54,6 +57,7 @@ export class PermissionController {
   }
 
   @ApiOperation({ summary: 'Обновление данных разрешения' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'id', description: 'ID разрешения' })
   @ApiBody({ type: UpdatePermissionDto })
   @ApiResponse({
@@ -69,6 +73,7 @@ export class PermissionController {
   }
 
   @ApiOperation({ summary: 'Удаление разрешения' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'id', description: 'ID разрешения' })
   @ApiResponse({
     status: 204,

@@ -32,7 +32,9 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.findByUsername(createUserDto.username);
     if (existingUser) {
-      throw new BadRequestException('Пользователь с таким именем уже существует');
+      throw new BadRequestException(
+        'Пользователь с таким именем уже существует',
+      );
     }
     try {
       return this.repository.create(createUserDto);
@@ -146,7 +148,7 @@ export class UserService {
 
   async changePassword(
     { newPassword, previousPassword }: UpdatePasswordDto,
-    req: Request & { user: { userId: string, username: string } },
+    req: Request & { user: { userId: string; username: string } },
   ) {
     if (!req?.user) {
       throw new UnauthorizedException('Пользователь не авторизован');
@@ -161,9 +163,10 @@ export class UserService {
       throw new UnauthorizedException('Неверный старый пароль');
     }
 
-
     try {
-      await this.repository.update(req.user.userId, { password: await bcrypt.hash(newPassword, 10) });
+      await this.repository.update(req.user.userId, {
+        password: await bcrypt.hash(newPassword, 10),
+      });
       return { message: 'Пароль успешно изменен' };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -171,5 +174,24 @@ export class UserService {
       }
       throw new BadRequestException('Ошибка при смене пароля');
     }
+  }
+
+  async getMe(
+    req:Request & { user: { userId: string; username: string } },
+  ): Promise<{
+    id: string;
+    username: string;
+    roles: string[];
+  }> {
+
+    const user = await this.findOne(req.user.userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    return {
+      id: user.id,
+      username: user.username,
+      roles: user.roles.map((role) => role.name),
+    };
   }
 }

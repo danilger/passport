@@ -10,7 +10,7 @@ import {
   Post,
   UseGuards
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiCookieAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
@@ -24,6 +24,7 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @ApiOperation({ summary: 'Создание новой роли' })
+  @ApiCookieAuth()
   @ApiBody({ type: CreateRoleDto })
   @ApiResponse({
     status: 201,
@@ -39,6 +40,7 @@ export class RoleController {
   }
 
   @ApiOperation({ summary: 'Получение списка всех ролей' })
+  @ApiCookieAuth()
   @ApiResponse({
     status: 200,
     description: 'Список ролей успешно получен',
@@ -51,6 +53,7 @@ export class RoleController {
   }
 
   @ApiOperation({ summary: 'Получение роли по ID' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'id', description: 'ID роли' })
   @ApiResponse({
     status: 200,
@@ -65,6 +68,7 @@ export class RoleController {
   }
 
   @ApiOperation({ summary: 'Обновление данных роли' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'id', description: 'ID роли' })
   @ApiBody({ type: UpdateRoleDto })
   @ApiResponse({
@@ -80,6 +84,7 @@ export class RoleController {
   }
 
   @ApiOperation({ summary: 'Удаление роли' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'id', description: 'ID роли' })
   @ApiResponse({
     status: 204,
@@ -95,6 +100,7 @@ export class RoleController {
   }
 
   @ApiOperation({ summary: 'Назначение разрешений роли' })
+  @ApiCookieAuth()
   @ApiParam({ name: 'roleName', description: 'Название роли' })
   @ApiBody({
     schema: {
