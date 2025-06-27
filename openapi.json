@@ -303,20 +303,6 @@
         ]
       }
     },
-    "/test/me": {
-      "get": {
-        "operationId": "TestController_getMe",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Test"
-        ]
-      }
-    },
     "/role": {
       "post": {
         "operationId": "RoleController_create",
@@ -772,11 +758,11 @@
       "description": "Управление пользователями"
     },
     {
-      "name": "roles",
+      "name": "role",
       "description": "Управление ролями"
     },
     {
-      "name": "permissions",
+      "name": "permission",
       "description": "Управление разрешениями"
     }
   ],

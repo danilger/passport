@@ -49,8 +49,8 @@ async function bootstrap() {
     .addTag('app', 'Общая информация о сервисе')
     .addTag('auth', 'Аутентификация и авторизация')
     .addTag('user', 'Управление пользователями')
-    .addTag('roles', 'Управление ролями')
-    .addTag('permissions', 'Управление разрешениями')
+    .addTag('role', 'Управление ролями')
+    .addTag('permission', 'Управление разрешениями')
     .addCookieAuth('access_token')
     .build();
 
