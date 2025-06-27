@@ -198,262 +198,55 @@ POST /roles/{roleId}/permissions
 
 #### Безопасность
 
-- Проверка прав происходит на каждый защищенный endpoint
-- Невозможно удалить последнюю роль у пользователя
-- Системные роли (admin, user) нельзя удалить
-- При удалении роли или разрешения:
-  * Проверяется наличие зависимых сущностей
-  * Производится очистка связей в промежуточных таблицах
-  * Сохраняется целостность данных
-
-#### Примеры использования
-
-1. **Создание новой роли с разрешениями**
-```typescript
-// Создание роли
-const role = await roleService.create({ name: 'content_manager' });
-
-// Назначение разрешений
-await roleService.setPermissions(role.id, [
-  'create_content',
-  'edit_content',
-  'delete_content'
-]);
-```
-
-2. **Проверка прав пользователя**
-```typescript
-// В сервисе
-async checkUserPermission(userId: string, permissionName: string): Promise<boolean> {
-  const user = await this.userRepository.findOne({
-    where: { id: userId },
-    relations: ['roles', 'roles.permissions']
-  });
-
-  return user.roles.some(role => 
-    role.permissions.some(permission => 
-      permission.name === permissionName
-    )
-  );
-}
-```
-
-### Обработка ошибок
-
-- Кастомные исключения для различных ситуаций
-- Информативные сообщения об ошибках на русском языке
-- Корректная обработка конфликтов при удалении связанных сущностей
-
-### Безопасность
-
-- Хеширование паролей с использованием bcrypt
-- Валидация входящих данных через DTO
-- Защита endpoints с помощью JWT и ролевых гвардов
-- Безопасное хранение JWT токена:
-  * Использование HttpOnly кук предотвращает доступ к токену через JavaScript
-  * Флаг Secure обеспечивает передачу токена только по HTTPS
-  * SameSite=Strict защищает от CSRF атак
-  * Токен недоступен для вредоносных скриптов при XSS атаках
-
-### Аутентификация с Passport.js
-
-#### Общее описание
-
-[Passport.js](http://www.passportjs.org/) - это middleware для Node.js, который упрощает процесс аутентификации. В нашем проекте он интегрирован с NestJS и используется для:
-- JWT аутентификации
-- Защиты маршрутов
-- Управления сессиями
-
-#### Реализованные стратегии
-
-1. **JWT Strategy**
-```typescript
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET'),
-    });
-  }
-
-  async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username };
-  }
-}
-```
-
-2. **Local Strategy** (для логина по username/password)
-```typescript
-@Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly authService: AuthService) {
-    super();
-  }
-
-  async validate(username: string, password: string): Promise<any> {
-    const user = await this.authService.validateUser(username, password);
-    if (!user) {
-      throw new UnauthorizedException('Неверные учетные данные');
-    }
-    return user;
-  }
-}
-```
-
-#### Процесс аутентификации
-
-1. **Вход в систему**
-```typescript
-// 1. Пользователь отправляет credentials
-POST /auth/login
-{
-  "username": "user@example.com",
-  "password": "password123"
-}
-
-// 2. LocalStrategy проверяет credentials
-// 3. В случае успеха генерируется JWT токен и устанавливается в HttpOnly куки
-// Ответ от сервера:
-{
-  "message": "Успешная аутентификация"
-}
-
-// Заголовки ответа:
-Set-Cookie: access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict
-```
-
-2. **Защита маршрутов**
-```typescript
-@UseGuards(JwtAuthGuard)
-@Get('profile')
-getProfile(@Request() req) {
-  return req.user;
-}
-```
-
-#### Особенности реализации
-
-1. **Безопасное хранение токена**
-```typescript
-@Injectable()
-export class AuthService {
-  async login(user: any) {
-    const token = this.jwtService.sign(payload);
-    
-    // Установка токена в HttpOnly куки
-    return {
-      message: 'Успешная аутентификация',
-      headers: {
-        'Set-Cookie': `access_token=${token}; HttpOnly; Secure; SameSite=Strict`
-      }
-    };
-  }
-}
-```
-
-2. **Конфигурация модуля**
-```typescript
-@Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: { 
-          expiresIn: '24h',
-          audience: 'passport-app',
-          issuer: 'passport-auth'
-        },
-      }),
-      inject: [ConfigService],
-    }),
-  ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports: [AuthService],
-})
-export class AuthModule {}
-```
-
-3. **Безопасность токенов**
-- Ограниченный срок жизни (24 часа)
-- Подпись с использованием секретного ключа
-- Проверка издателя и аудитории
-- Защита от XSS и CSRF атак
-
-4. **Обработка ошибок**
-```typescript
-try {
-  const user = await this.authService.validateUser(username, password);
-  return this.authService.login(user);
-} catch (error) {
-  if (error instanceof UnauthorizedException) {
-    throw error;
-  }
-  throw new InternalServerErrorException('Ошибка аутентификации');
-}
-```
-
-#### Преимущества использования Passport.js
-
-1. **Гибкость**
-   - Легкое добавление новых стратегий аутентификации
-   - Поддержка OAuth (Google, Facebook и др.)
-   - Возможность комбинировать различные стратегии
-
-2. **Безопасность**
-   - Проверенные временем стратегии
-   - Защита от основных видов атак
-   - Поддержка современных стандартов безопасности
-
-3. **Интеграция**
-   - Отличная совместимость с NestJS
-   - Поддержка TypeScript
-   - Простая интеграция с базами данных
-
-4. **Масштабируемость**
-   - Легкое добавление новых провайдеров
-   - Поддержка кастомных стратегий
-   - Возможность горизонтального масштабирования
-
-## Разработка
-
-### Структура проекта
-
-```
-src/
-├── auth/           # Модуль аутентификации
-├── user/           # Модуль пользователей
-├── role/           # Модуль ролей
-├── permission/     # Модуль разрешений
-├── common/         # Общие компоненты
-└── database/       # Конфигурация базы данных
-```
-
-### Добавление новых функций
-
-1. Создайте новый модуль: `nest g module name`
-2. Создайте контроллер: `nest g controller name`
-3. Создайте сервис: `nest g service name`
-4. Добавьте необходимые DTO и entities
-5. Обновите документацию Swagger
+- Все пароли хешируются перед сохранением в базу данных
+- Используется механизм JWT с refresh-токенами
+- Применяются secure cookies с настройками httpOnly и sameSite
+- Валидация всех входных данных
 
 ## Тестирование
 
+### End-to-End тесты
+
+Проект включает набор E2E тестов для проверки API endpoints. Тесты используют нативный `fetch` из Node.js для выполнения HTTP-запросов.
+
+#### Запуск тестов
+
 ```bash
-# Unit тесты
-npm run test
+# Запуск всех E2E тестов
+npm run test:e2e:docker
 
-# E2E тесты
-npm run test:e2e
 
-# Test coverage
-npm run test:cov
 ```
+
+#### Покрытие тестами
+
+E2E тесты охватывают следующие модули:
+- User management (CRUD операции)
+- Role management
+- Permission management
+- Authentication flows
+- Access control checks
+
+### Сценарии тестирования
+
+1. **User Module Tests**
+   - Регистрация пользователя
+   - Аутентификация
+   - Управление профилем
+   - Смена пароля
+   - Проверка ограничений доступа
+
+2. **Role Module Tests**
+   - Создание и управление ролями
+   - Назначение ролей пользователям
+   - Проверка иерархии ролей
+   - Валидация ограничений
+
+3. **Permission Module Tests**
+   - Управление разрешениями
+   - Назначение разрешений ролям
+   - Проверка наследования разрешений
+   - Валидация доступа к ресурсам
 
 ## Лицензия
 
