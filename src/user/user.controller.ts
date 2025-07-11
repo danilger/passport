@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiResponse,
-  ApiTags
+  ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
@@ -27,8 +28,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 import { UserMeResponse } from './dto/userme-response';
-
-
+import { queryDto } from 'src/common/dto/query.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -59,8 +59,8 @@ export class UserController {
   @Get()
   @Permissions('can_read:users')
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() query: queryDto) {
+    return this.userService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Получение информации о себе' })
@@ -68,12 +68,14 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Информация о себе успешно получена',
-    type: UserMeResponse
+    type: UserMeResponse,
   })
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getMe(@Req() req: Request & { user: { userId: string; username: string } }) {
+  async getMe(
+    @Req() req: Request & { user: { userId: string; username: string } },
+  ) {
     return await this.userService.getMe(req);
   }
 
@@ -169,6 +171,4 @@ export class UserController {
   ) {
     return await this.userService.changePassword(newPassword, req);
   }
-
-
 }

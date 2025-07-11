@@ -1,13 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { PermissionService } from './permission.service';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
+import { queryDto } from 'src/common/dto/query.dto';
 
-@ApiTags('permissions')
+@ApiTags('permission')
 @Controller('permission')
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
@@ -37,8 +57,8 @@ export class PermissionController {
   @Permissions('can_read:permissions')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
-  findAll() {
-    return this.permissionService.findAll();
+  findAll(@Query() query: queryDto) {
+    return this.permissionService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Получение разрешения по ID' })
@@ -68,7 +88,10 @@ export class PermissionController {
   @Permissions('can_update:permission')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePermissionDto: UpdatePermissionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePermissionDto: UpdatePermissionDto,
+  ) {
     return this.permissionService.update(id, updatePermissionDto);
   }
 
@@ -87,4 +110,6 @@ export class PermissionController {
   remove(@Param('id') id: string) {
     return this.permissionService.remove(id);
   }
+
+
 }

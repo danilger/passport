@@ -12,6 +12,8 @@ import { PERMISSION_REPOSITORY } from 'src/permission/repositories/typeorm-permi
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { ROLE_REPOSITORY } from './repositories/typeorm-role.repository';
+import { queryDto } from 'src/common/dto/query.dto';
+import { makeParams } from 'src/common/adapters/makeParams';
 
 @Injectable()
 export class RoleService {
@@ -47,9 +49,12 @@ export class RoleService {
     }
   }
 
-  async findAll() {
+  async findAll(query: queryDto) {
+    const { skip, take, search } = makeParams(query);
     try {
-      return this.roleRepository.findAll();
+      const data = await this.roleRepository.findAll({ skip, take, search });
+      const total = await this.roleRepository.count(search);
+      return { data, total };
     } catch (error) {
       throw new BadRequestException('Ошибка при получении списка ролей');
     }

@@ -8,6 +8,8 @@ import { IPermissionRepository } from 'src/common/interfaces/repository.interfac
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { PERMISSION_REPOSITORY } from './repositories/typeorm-permission.repository';
+import { queryDto } from 'src/common/dto/query.dto';
+import { makeParams } from 'src/common/adapters/makeParams';
 
 @Injectable()
 export class PermissionService {
@@ -37,9 +39,12 @@ export class PermissionService {
     }
   }
 
-  async findAll() {
+  async findAll(query: queryDto) {
+    const { skip, take, search} = makeParams(query);
+    const data = await this.permissionRepository.findAll({ skip, take, search });
+    const total = await this.permissionRepository.count(search);
     try {
-      return this.permissionRepository.findAll();
+      return { data, total };
     } catch (error) {
       throw new BadRequestException('Ошибка при получении списка разрешений');
     }
@@ -103,7 +108,7 @@ export class PermissionService {
     try {
       // Получаем разрешение со связями
       const permissionWithRoles = await this.permissionRepository.findById(id);
-      
+
       if (!permissionWithRoles) {
         throw new NotFoundException(`Разрешение с ID "${id}" не найдено`);
       }
@@ -124,4 +129,5 @@ export class PermissionService {
       throw new BadRequestException('Ошибка при удалении разрешения');
     }
   }
+
 }

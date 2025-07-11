@@ -9,10 +9,11 @@ import { User } from 'src/user/entities/user.entity';
  */
 export interface IRepository<T> {
   findById(id: string): Promise<T | null>;
-  findAll(): Promise<T[]>;
+  findAll(params: QueryParams): Promise<T[]>;
   create(data: Partial<T>): Promise<T>;
   update(id: string, data: Partial<T>): Promise<T | null>;
   delete(id: string): Promise<boolean>;
+  count(search?: string): Promise<number>;
 }
 
 /**
@@ -46,10 +47,10 @@ export interface IPermissionRepository extends IRepository<Permission> {
    */
   findByNames(names: string[]): Promise<Permission[] | null>;
 
-    /**
+  /**
    * Сохранение сущности разрешения
    */
-    save(entity: Permission): Promise<Permission>;
+  save(entity: Permission): Promise<Permission>;
 }
 
 /**
@@ -71,4 +72,10 @@ export interface IRoleRepository extends IRepository<Role> {
    * Сохранение сущности роли
    */
   save(entity: Role): Promise<Role>;
+}
+
+export interface QueryParams {
+  skip: number;
+  take: number;
+  search?: string;
 }

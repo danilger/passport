@@ -1,9 +1,5 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import * as cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
 import { Api } from '../utils/api';
-import { AppModule } from '../../src/app.module';
 
 config({ path: '.env.test', override: true });
 
@@ -34,8 +30,6 @@ export const userOperationsTestSuit = (api: Api) => {
 
     const user = await createUserResponse.json();
     userId = user.id;
-
-    console.log(['userId', userId]);
 
     expect(createUserResponse.status).toBe(201);
   });

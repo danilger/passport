@@ -18,6 +18,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { USER_REPOSITORY } from './repositories/typeorm-user.repository';
 import * as bcrypt from 'bcrypt';
+import { queryDto } from 'src/common/dto/query.dto';
+import { makeParams } from 'src/common/adapters/makeParams';
 @Injectable()
 export class UserService {
   constructor(
@@ -43,9 +45,12 @@ export class UserService {
     }
   }
 
-  async findAll() {
+  async findAll(query: queryDto) {
+    const { skip, take, search } = makeParams(query);
     try {
-      return await this.repository.findAll();
+      const data = await this.repository.findAll({ skip, take, search });
+      const total = await this.repository.count(search);
+      return { data, total };
     } catch (error) {
       throw new BadRequestException(
         'Ошибка при получении списка пользователей',
@@ -177,21 +182,26 @@ export class UserService {
   }
 
   async getMe(
-    req:Request & { user: { userId: string; username: string } },
+    req: Request & { user: { userId: string; username: string } },
   ): Promise<{
     id: string;
     username: string;
     roles: string[];
   }> {
-
-    const user = await this.findOne(req.user.userId);
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
+    try {
+      const user = await this.findOne(req.user.userId);
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден');
+      }
+      return {
+        id: user.id,
+        username: user.username,
+        roles: user.roles.map((role) => role.name),
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        'Ошибка при получении данных пользователя',
+      );
     }
-    return {
-      id: user.id,
-      username: user.username,
-      roles: user.roles.map((role) => role.name),
-    };
   }
 }

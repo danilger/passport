@@ -7,6 +7,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -46,30 +47,30 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { id, username, roles = [], permissions = [] } = req.user;
-    
+
     const payload = {
       sub: id,
       username,
       roles,
-      permissions
+      permissions,
     };
 
     const tokens = await this.authService.getTokens(payload);
 
-    const isTestEnvironment = process.env.NODE_ENV === 'test';
+    // const isTestEnvironment = process.env.NODE_ENV === 'test';
 
     res.cookie('access_token', tokens.accessToken, {
       httpOnly: true,
-      secure: !isTestEnvironment,
-      sameSite: isTestEnvironment ? 'lax' : 'strict',
+      secure: false, //ВАЖНО НА ПРОДЕ СДЛЕЛАТЬ true         !isTestEnvironment,
+      sameSite: 'lax', //ВАЖНО НА ПРОДЕ СДЛЕЛАТЬ strict     isTestEnvironment ? 'lax' : 'strict',
       maxAge: 15 * 60 * 1000,
       path: '/',
     });
 
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
-      secure: !isTestEnvironment,
-      sameSite: isTestEnvironment ? 'lax' : 'strict',
+      secure: false, //ВАЖНО НА ПРОДЕ СДЛЕЛАТЬ true         !isTestEnvironment,
+      sameSite: 'lax', //ВАЖНО НА ПРОДЕ СДЛЕЛАТЬ strict     isTestEnvironment ? 'lax' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/auth/refresh',
     });
@@ -104,7 +105,7 @@ export class AuthController {
       sub,
       username,
       roles,
-      permissions
+      permissions,
     });
 
     res.cookie('access_token', tokens.accessToken, {
@@ -144,5 +145,22 @@ export class AuthController {
       path: '/auth/refresh',
     });
     return { message: 'Выход выполнен успешно' };
+  }
+
+  @Get('check')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async checkAuth(@Req() req: Request & { user: UserWithRolesAndPermissions }) {
+    const { id, username, roles = [], permissions = [] } = req.user;
+
+    return {
+      message: 'Проверка аутентификации прошла успешно',
+      user: {
+        id,
+        username,
+        roles,
+        permissions,
+      },
+    };
   }
 }

@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards
 } from '@nestjs/common';
 import { ApiBody, ApiCookieAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -17,8 +18,9 @@ import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleService } from './role.service';
+import { queryDto } from 'src/common/dto/query.dto';
 
-@ApiTags('roles')
+@ApiTags('role')
 @Controller('role')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
@@ -48,8 +50,8 @@ export class RoleController {
   @Permissions('can_read:roles')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
-  findAll() {
-    return this.roleService.findAll();
+  findAll(@Query() query:queryDto) {
+    return this.roleService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Получение роли по ID' })
