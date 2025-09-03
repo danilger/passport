@@ -6,10 +6,12 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { AuthService } from 'src/auth/auth.service';
 import {
   IRoleRepository,
   IUserRepository,
+  QueryParams,
 } from 'src/common/interfaces/repository.interface';
 import { ROLE_REPOSITORY } from 'src/role/repositories/typeorm-role.repository';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,9 +19,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { USER_REPOSITORY } from './repositories/typeorm-user.repository';
-import * as bcrypt from 'bcrypt';
-import { queryDto } from 'src/common/dto/query.dto';
-import { makeParams } from 'src/common/adapters/makeParams';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -45,11 +45,10 @@ export class UserService {
     }
   }
 
-  async findAll(query: queryDto) {
-    const { skip, take, search } = makeParams(query);
+  async findAll(params: QueryParams) {
     try {
-      const data = await this.repository.findAll({ skip, take, search });
-      const total = await this.repository.count(search);
+      const data = await this.repository.findAll(params);
+      const total = await this.repository.count(params.search);
       return { data, total };
     } catch (error) {
       throw new BadRequestException(
@@ -141,8 +140,11 @@ export class UserService {
         (role, index, self) =>
           index === self.findIndex((r) => r.id === role.id),
       );
-
-      return this.repository.save(user);
+      
+      //Сохраняем пользователя с обновленными ролями
+      await this.repository.save(user);
+      
+      return this.repository.findById(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -199,9 +201,7 @@ export class UserService {
         roles: user.roles.map((role) => role.name),
       };
     } catch (error) {
-      throw new BadRequestException(
-        'Ошибка при получении данных пользователя',
-      );
+      throw new BadRequestException('Ошибка при получении данных пользователя');
     }
   }
 }

@@ -4,12 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { IPermissionRepository } from 'src/common/interfaces/repository.interface';
+import {
+  IPermissionRepository,
+  QueryParams,
+} from 'src/common/interfaces/repository.interface';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { PERMISSION_REPOSITORY } from './repositories/typeorm-permission.repository';
-import { queryDto } from 'src/common/dto/query.dto';
-import { makeParams } from 'src/common/adapters/makeParams';
 
 @Injectable()
 export class PermissionService {
@@ -39,16 +40,20 @@ export class PermissionService {
     }
   }
 
-  async findAll(query: queryDto) {
-    const { skip, take, search} = makeParams(query);
-    const data = await this.permissionRepository.findAll({ skip, take, search });
-    const total = await this.permissionRepository.count(search);
+  async findAll(params: QueryParams) {
+    console.log(params);
     try {
+      const data = await this.permissionRepository.findAll(params);
+      const total = await this.permissionRepository.count(
+        params.search,
+        params.filters,
+      );
       return { data, total };
     } catch (error) {
       throw new BadRequestException('Ошибка при получении списка разрешений');
     }
   }
+
 
   async findOne(id: string) {
     try {
@@ -129,5 +134,4 @@ export class PermissionService {
       throw new BadRequestException('Ошибка при удалении разрешения');
     }
   }
-
 }

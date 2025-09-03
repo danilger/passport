@@ -19,6 +19,8 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleService } from './role.service';
 import { queryDto } from 'src/common/dto/query.dto';
+import { makeParams } from 'src/common/adapters/makeParams';
+import { Role } from './entities/role.entity';
 
 @ApiTags('role')
 @Controller('role')
@@ -31,6 +33,8 @@ export class RoleController {
   @ApiResponse({
     status: 201,
     description: 'Роль успешно создана',
+    type: Role
+
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
   @Permissions('can_create:role')
@@ -51,7 +55,8 @@ export class RoleController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
   findAll(@Query() query:queryDto) {
-    return this.roleService.findAll(query);
+    const params = makeParams(query);
+    return this.roleService.findAll(params);
   }
 
   @ApiOperation({ summary: 'Получение роли по ID' })
@@ -106,7 +111,6 @@ export class RoleController {
   @ApiParam({ name: 'roleName', description: 'Название роли' })
   @ApiBody({
     schema: {
-      type: 'object',
       properties: {
         permissions: {
           type: 'array',

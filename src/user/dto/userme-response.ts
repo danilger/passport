@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UserMeResponse {
-    @ApiProperty()
+    @ApiProperty({ description: 'ID пользователя' })
     id: string;
   
-    @ApiProperty()
+    @ApiProperty({ description: 'Имя пользователя' })
     username: string;
   
-    @ApiProperty({ type: [String] })
+    @ApiProperty({ description: 'Роли пользователя' })
     roles: string[];
   }

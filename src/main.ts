@@ -30,19 +30,19 @@ async function bootstrap() {
   // Добавляем глобальную валидацию
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: false,
-      stopAtFirstError: true,
+      transform: true, // Автоматически преобразует примитивы в нужный тип (например, строку '1' в число 1)
+      whitelist: true, // Удаляет все свойства, которые не имеют декораторов валидации в DTO
+      forbidNonWhitelisted: false, // Не выбрасывает ошибку при наличии лишних свойств (просто удаляет их)
+      stopAtFirstError: true, // Останавливает валидацию при первой найденной ошибке
       validationError: {
-        target: false,
-        value: false,
+        target: false, // Не включает объект с ошибкой в ответ об ошибке
+        value: false, // Не включает значение с ошибкой в ответ об ошибке
       },
       transformOptions: {
-        enableImplicitConversion: true,
-        exposeDefaultValues: true,
+        enableImplicitConversion: true, // Включает неявное преобразование типов
+        exposeDefaultValues: true, // Устанавливает значения по умолчанию из декораторов
       },
-      disableErrorMessages: false,
+      disableErrorMessages: false, // Разрешает отправку сообщений об ошибках клиенту
     }),
   );
 
@@ -81,7 +81,7 @@ async function bootstrap() {
 
   SwaggerModule.setup('api/docs', app, document);
 
-  app.use(cookieParser());
+  app.use(cookieParser());  // Подключаем middleware для парсинга cookies, позволяет работать с req.cookies в обработчиках запросов
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

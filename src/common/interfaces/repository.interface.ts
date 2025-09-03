@@ -13,7 +13,7 @@ export interface IRepository<T> {
   create(data: Partial<T>): Promise<T>;
   update(id: string, data: Partial<T>): Promise<T | null>;
   delete(id: string): Promise<boolean>;
-  count(search?: string): Promise<number>;
+  count(search?: string, filters?:Record<string,any>): Promise<number>;
 }
 
 /**
@@ -78,4 +78,5 @@ export interface QueryParams {
   skip: number;
   take: number;
   search?: string;
+  filters?: Record<string, string>;
 }

@@ -21,14 +21,19 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { makeParams } from 'src/common/adapters/makeParams';
 import { Permissions } from 'src/common/decorators/permission.decorator';
+import { queryDto } from 'src/common/dto/query.dto';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserService } from './user.service';
+import { UserListResponse } from './dto/user-list-response.dto';
+import { UserResponse } from './dto/user-response.dto';
 import { UserMeResponse } from './dto/userme-response';
-import { queryDto } from 'src/common/dto/query.dto';
+import { User } from './entities/user.entity';
+import { UserService } from './user.service';
+import { UserChangePasswordResponseDto } from './dto/user-change-password-response.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -40,6 +45,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'Пользователь успешно создан',
+    type: User,
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
   @Post()
@@ -54,13 +60,15 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Список пользователей успешно получен',
+    type: UserListResponse,
   })
   @ApiResponse({ status: 403, description: 'Нет доступа' })
   @Get()
   @Permissions('can_read:users')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   findAll(@Query() query: queryDto) {
-    return this.userService.findAll(query);
+    const params = makeParams(query);
+    return this.userService.findAll(params);
   }
 
   @ApiOperation({ summary: 'Получение информации о себе' })
@@ -85,6 +93,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Пользователь успешно найден',
+    type: UserResponse,
   })
   @ApiResponse({ status: 404, description: 'Пользователь не найден' })
   @Get(':id')
@@ -101,6 +110,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Данные пользователя успешно обновлены',
+    type: UserResponse,
   })
   @ApiResponse({ status: 404, description: 'Пользователь не найден' })
   @Patch(':id')
@@ -116,8 +126,12 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Пользователь успешно удален',
+    type: 'string',
   })
-  @ApiResponse({ status: 404, description: 'Пользователь не найден' })
+  @ApiResponse({
+    status: 404,
+    description: 'Пользователь не найден',
+  })
   @Delete(':id')
   @Permissions('can_delete:user')
   @UseGuards(JwtAuthGuard, PermissionGuard)
@@ -130,7 +144,6 @@ export class UserController {
   @ApiParam({ name: 'id', description: 'ID пользователя' })
   @ApiBody({
     schema: {
-      type: 'object',
       properties: {
         roles: {
           type: 'array',
@@ -145,7 +158,11 @@ export class UserController {
     status: 200,
     description: 'Роли успешно назначены пользователю',
   })
-  @ApiResponse({ status: 404, description: 'Пользователь или роли не найдены' })
+  @ApiResponse({
+    status: 404,
+    description: 'Пользователь или роли не найдены',
+    type: UserResponse,
+  })
   @Post('set-roles/:id')
   @HttpCode(HttpStatus.OK)
   @Permissions('can_manage:user_roles')
@@ -160,6 +177,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Пароль успешно изменен',
+    type: UserChangePasswordResponseDto,
   })
   @Post('change-password')
   @HttpCode(HttpStatus.OK)

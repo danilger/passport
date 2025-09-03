@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, ILike } from 'typeorm';
+import { makeWhere } from 'src/common/adapters/makeWhere';
+import { ILike, In, Repository } from 'typeorm';
 import {
   IPermissionRepository,
   QueryParams,
 } from '../../common/interfaces/repository.interface';
 import { Permission } from '../entities/permission.entity';
+import { filter } from 'rxjs';
 
 export const PERMISSION_REPOSITORY = Symbol('PERMISSION_REPOSITORY');
 
@@ -15,14 +17,16 @@ export class TypeOrmPermissionRepository implements IPermissionRepository {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
   ) {}
-
-  async findAll({ skip, take, search }: QueryParams): Promise<Permission[]> {
+ 
+  async findAll({
+    skip,
+    take,
+    search,
+    filters,
+  }: QueryParams): Promise<Permission[]> {
     try {
-      const where = search
-        ? [
-            { name: ILike(`%${search}%`) },
-          ]
-        : {};
+      console.log()
+      const where = {} // makeWhere(search, filters);
       return await this.permissionRepository.find({
         where,
         skip,
@@ -33,6 +37,7 @@ export class TypeOrmPermissionRepository implements IPermissionRepository {
       throw new Error(error);
     }
   }
+ 
 
   async findById(id: string): Promise<Permission | null> {
     try {
@@ -117,13 +122,9 @@ export class TypeOrmPermissionRepository implements IPermissionRepository {
     }
   }
 
-  async count(search: string) {
+  async count(search: string, filters?: Record<string, any>) {
     try {
-      const where = search
-        ? [
-            { name: ILike(`%${search}%`) },
-          ]
-        : {};
+      const where = {}//makeWhere(search, filters);
       return await this.permissionRepository.count({ where });
     } catch (error) {
       throw new Error(error);

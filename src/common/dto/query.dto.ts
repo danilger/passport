@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class queryDto {
-
   @ApiProperty({
     description: 'страница',
     required: false,
+    type: 'string',
   })
   @IsOptional()
   @IsString()
@@ -14,6 +15,7 @@ export class queryDto {
   @ApiProperty({
     description: 'отображаемых записей на странице',
     required: false,
+    type: 'string',
   })
   @IsOptional()
   @IsString()
@@ -22,6 +24,7 @@ export class queryDto {
   @ApiProperty({
     description: 'поле для сортировки',
     required: false,
+    type: 'string',
   })
   @IsOptional()
   @IsString()
@@ -30,7 +33,7 @@ export class queryDto {
   @ApiProperty({
     description: 'порядок сортировки ASC/DESC',
     required: false,
-    type: String,
+    type: 'string',
     enum: ['ASC', 'DESC'],
   })
   @IsOptional()
@@ -40,8 +43,24 @@ export class queryDto {
   @ApiProperty({
     description: 'поиск',
     required: false,
+    type: 'string',
   })
   @IsOptional()
   @IsString()
   q?: string;
+
+  @ApiProperty({
+    description: 'фильтры (объект в виде JSON-строки)',
+    required: false,
+    type: 'string',
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    try {
+      return typeof value === 'string' ? JSON.parse(value) : value;
+    } catch {
+      return {};
+    }
+  })
+  filters?: Record<string, string>;
 }

@@ -13,7 +13,6 @@ export class AppController {
     status: 200,
     description: 'Возвращает краткое описание сервиса и ссылку на документацию',
     schema: {
-      type: 'object',
       properties: {
         name: { type: 'string', example: 'Passport Service' },
         description: { type: 'string' },

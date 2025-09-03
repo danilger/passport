@@ -7,6 +7,7 @@ import {
 import {
   IPermissionRepository,
   IRoleRepository,
+  QueryParams,
 } from 'src/common/interfaces/repository.interface';
 import { PERMISSION_REPOSITORY } from 'src/permission/repositories/typeorm-permission.repository';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -49,11 +50,10 @@ export class RoleService {
     }
   }
 
-  async findAll(query: queryDto) {
-    const { skip, take, search } = makeParams(query);
+  async findAll(params:QueryParams) {
     try {
-      const data = await this.roleRepository.findAll({ skip, take, search });
-      const total = await this.roleRepository.count(search);
+      const data = await this.roleRepository.findAll(params);
+      const total = await this.roleRepository.count(params.search);
       return { data, total };
     } catch (error) {
       throw new BadRequestException('Ошибка при получении списка ролей');

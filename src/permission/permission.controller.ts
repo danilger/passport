@@ -26,6 +26,8 @@ import {
   ApiCookieAuth,
 } from '@nestjs/swagger';
 import { queryDto } from 'src/common/dto/query.dto';
+import { makeParams } from 'src/common/adapters/makeParams';
+import { Permission } from './entities/permission.entity';
 
 @ApiTags('permission')
 @Controller('permission')
@@ -38,6 +40,8 @@ export class PermissionController {
   @ApiResponse({
     status: 201,
     description: 'Разрешение успешно создано',
+    type: Permission,
+
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
   @Permissions('can_create:permission')
@@ -58,7 +62,8 @@ export class PermissionController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
   findAll(@Query() query: queryDto) {
-    return this.permissionService.findAll(query);
+    const params = makeParams(query);
+    return this.permissionService.findAll(params);
   }
 
   @ApiOperation({ summary: 'Получение разрешения по ID' })
@@ -110,6 +115,4 @@ export class PermissionController {
   remove(@Param('id') id: string) {
     return this.permissionService.remove(id);
   }
-
-
 }
