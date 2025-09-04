@@ -7,3 +7,8 @@ DB_PORT=5433
 
 JWT_ACCESS_SECRET=access-secret-key
 JWT_REFRESH_SECRET=refresh-secret-key
+
+# Directus настройки
+SECRET=admin-secret-key
+ADMIN_EMAIL=admin@email.com
+ADMIN_PASSWORD=Admin123
