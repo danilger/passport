@@ -9,18 +9,29 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiCookieAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCookieAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { makeParams } from 'src/common/adapters/makeParams';
 import { Permissions } from 'src/common/decorators/permission.decorator';
+import { queryDto } from 'src/common/dto/query.dto';
 import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { CreateRoleDto } from './dto/create-role.dto';
+import {
+  RoleListResponse,
+  RoleWithUsersAndPermissions,
+} from './dto/role-list-response.dto';
+import { RoleResponseWithId } from './dto/role-response.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleService } from './role.service';
-import { queryDto } from 'src/common/dto/query.dto';
-import { makeParams } from 'src/common/adapters/makeParams';
-import { Role } from './entities/role.entity';
 
 @ApiTags('role')
 @Controller('role')
@@ -33,10 +44,12 @@ export class RoleController {
   @ApiResponse({
     status: 201,
     description: 'Роль успешно создана',
-    type: Role
-
+    type: RoleResponseWithId,
   })
-  @ApiResponse({ status: 400, description: 'Некорректные данные' })
+  @ApiResponse({
+    status: 400,
+    description: 'Некорректные данные',
+  })
   @Permissions('can_create:role')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Post()
@@ -50,11 +63,12 @@ export class RoleController {
   @ApiResponse({
     status: 200,
     description: 'Список ролей успешно получен',
+    type: RoleListResponse,
   })
   @Permissions('can_read:roles')
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @Get()
-  findAll(@Query() query:queryDto) {
+  findAll(@Query() query: queryDto) {
     const params = makeParams(query);
     return this.roleService.findAll(params);
   }
@@ -65,6 +79,7 @@ export class RoleController {
   @ApiResponse({
     status: 200,
     description: 'Роль успешно найдена',
+    type: RoleWithUsersAndPermissions,
   })
   @ApiResponse({ status: 404, description: 'Роль не найдена' })
   @Permissions('can_read:role')
@@ -81,6 +96,7 @@ export class RoleController {
   @ApiResponse({
     status: 200,
     description: 'Данные роли успешно обновлены',
+    type: RoleWithUsersAndPermissions,
   })
   @ApiResponse({ status: 404, description: 'Роль не найдена' })
   @Permissions('can_update:role')
@@ -116,14 +132,15 @@ export class RoleController {
           type: 'array',
           items: { type: 'string' },
           description: 'Массив названий разрешений',
-          example: ['can_read', 'can_write']
-        }
-      }
-    }
+          example: ['can_read', 'can_write'],
+        },
+      },
+    },
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Разрешения успешно назначены роли',
+    type: RoleWithUsersAndPermissions,
   })
   @ApiResponse({ status: 404, description: 'Роль или разрешения не найдены' })
   @Permissions('can_manage:role_permissions')
@@ -131,7 +148,7 @@ export class RoleController {
   @Post('set-permissions/:roleName')
   setPermissionToRole(
     @Param('roleName') roleName: string,
-    @Body() body: { permissions: string[] }
+    @Body() body: { permissions: string[] },
   ) {
     return this.roleService.setPermissionToRole(roleName, body.permissions);
   }

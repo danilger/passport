@@ -28,12 +28,11 @@ import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserListResponse } from './dto/user-list-response.dto';
-import { UserResponse } from './dto/user-response.dto';
-import { UserMeResponse } from './dto/userme-response';
-import { User } from './entities/user.entity';
-import { UserService } from './user.service';
 import { UserChangePasswordResponseDto } from './dto/user-change-password-response.dto';
+import { UserListResponse } from './dto/user-list-response.dto';
+import { UserResponse, UserWithoutRoles } from './dto/user-response.dto';
+import { UserMeResponse } from './dto/userme-response';
+import { UserService } from './user.service';
 
 @ApiTags('user')
 @Controller('user')
@@ -45,7 +44,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'Пользователь успешно создан',
-    type: User,
+    type: UserWithoutRoles,
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
   @Post()

@@ -22,6 +22,8 @@ import { AuthService, UserWithRolesAndPermissions } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { LoginResponse } from './dto/login-response.dto';
+import { CheckAuthResponseDto } from './dto/check-auth-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -37,6 +39,7 @@ export class AuthController {
     status: 200,
     description:
       'Успешный вход в систему. Устанавливаются куки access_token и refresh_token',
+    type: LoginResponse,
   })
   @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
   @UseGuards(LocalAuthGuard)
@@ -63,7 +66,7 @@ export class AuthController {
       httpOnly: true,
       secure: false, //ВАЖНО НА ПРОДЕ СДЛЕЛАТЬ true         !isTestEnvironment,
       sameSite: 'lax', //ВАЖНО НА ПРОДЕ СДЛЕЛАТЬ strict     isTestEnvironment ? 'lax' : 'strict',
-      maxAge: 15 * 60 * 1000,
+      maxAge: 60 * 60 * 1000,
       path: '/',
     });
 
@@ -82,6 +85,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Токен успешно обновлен. Устанавливаются новые куки',
+    type: LoginResponse,
   })
   @ApiResponse({ status: 401, description: 'Невалидный refresh token' })
   @Post('refresh')
@@ -112,7 +116,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 15 * 60 * 1000,
+      maxAge: 60 * 60 * 1000,
       path: '/',
     });
 
@@ -132,6 +136,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'Успешный выход. Куки удалены',
+    type: LoginResponse,
   })
   @Post('logout')
   @UseGuards(JwtAuthGuard)
@@ -147,6 +152,12 @@ export class AuthController {
     return { message: 'Выход выполнен успешно' };
   }
 
+  @ApiOperation({ summary: 'Проверка аутентификации' })
+  @ApiResponse({
+    status: 200,
+    description: 'Проверка аутентификации прошла успешно',
+    type: CheckAuthResponseDto,
+  })
   @Get('check')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

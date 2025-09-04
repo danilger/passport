@@ -1,17 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../entities/user.entity';
+import { UserWithoutRoles } from './user-response.dto';
 
 export class UserListResponse {
-  @ApiProperty({ 
-    type: [User], 
-    description: 'Список пользователей' 
+  @ApiProperty({
+    type: [UserWithoutRoles],
+    description: 'Список пользователей',
   })
-  data: User[];
+  data: UserWithoutRoles[];
 
-  @ApiProperty({ 
-    example: 100, 
-    description: 'Общее количество записей' 
+  @ApiProperty({
+    example: 100,
+    description: 'Общее количество записей',
   })
   total: number;
-
 }

@@ -55,7 +55,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UserWithoutRoles"
                 }
               }
             }
@@ -429,7 +429,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Role"
+                  "$ref": "#/components/schemas/RoleResponseWithId"
                 }
               }
             }
@@ -512,7 +512,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Список ролей успешно получен"
+            "description": "Список ролей успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleListResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -542,7 +549,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Роль успешно найдена"
+            "description": "Роль успешно найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleWithUsersAndPermissions"
+                }
+              }
+            }
           },
           "404": {
             "description": "Роль не найдена"
@@ -583,7 +597,14 @@
         },
         "responses": {
           "200": {
-            "description": "Данные роли успешно обновлены"
+            "description": "Данные роли успешно обновлены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleWithUsersAndPermissions"
+                }
+              }
+            }
           },
           "404": {
             "description": "Роль не найдена"
@@ -668,8 +689,15 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Разрешения успешно назначены роли"
+          "201": {
+            "description": "Разрешения успешно назначены роли",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleWithUsersAndPermissions"
+                }
+              }
+            }
           },
           "404": {
             "description": "Роль или разрешения не найдены"
@@ -706,7 +734,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Permission"
+                  "$ref": "#/components/schemas/PermissionResponse"
                 }
               }
             }
@@ -789,7 +817,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Список разрешений успешно получен"
+            "description": "Список разрешений успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionListResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -819,7 +854,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Разрешение успешно найдено"
+            "description": "Разрешение успешно найдено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Разрешение не найдено"
@@ -860,7 +902,14 @@
         },
         "responses": {
           "200": {
-            "description": "Данные разрешения успешно обновлены"
+            "description": "Данные разрешения успешно обновлены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionResponse"
+                }
+              }
+            }
           },
           "404": {
             "description": "Разрешение не найдено"
@@ -924,7 +973,14 @@
         },
         "responses": {
           "200": {
-            "description": "Успешный вход в систему. Устанавливаются куки access_token и refresh_token"
+            "description": "Успешный вход в систему. Устанавливаются куки access_token и refresh_token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Неверные учетные данные"
@@ -942,7 +998,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Токен успешно обновлен. Устанавливаются новые куки"
+            "description": "Токен успешно обновлен. Устанавливаются новые куки",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Невалидный refresh token"
@@ -960,7 +1023,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Успешный выход. Куки удалены"
+            "description": "Успешный выход. Куки удалены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -980,9 +1050,17 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Проверка аутентификации прошла успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckAuthResponseDto"
+                }
+              }
+            }
           }
         },
+        "summary": "Проверка аутентификации",
         "tags": [
           "auth"
         ]
@@ -1084,7 +1162,7 @@
           "password"
         ]
       },
-      "User": {
+      "UserWithoutRoles": {
         "type": "object",
         "properties": {
           "id": {
@@ -1137,13 +1215,6 @@
           "timezone": {
             "type": "string",
             "description": "Часовой пояс пользователя"
-          },
-          "roles": {
-            "description": "Роли пользователя",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Role"
-            }
           }
         },
         "required": [
@@ -1152,64 +1223,7 @@
           "email",
           "password",
           "isActive",
-          "isVerified",
-          "roles"
-        ]
-      },
-      "Permission": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "roles": {
-            "description": "Роли, связанные с данным разрешением",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Role"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "roles"
-        ]
-      },
-      "Role": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Уникальный идентификатор роли"
-          },
-          "name": {
-            "type": "string",
-            "description": "Название роли (уникальное)"
-          },
-          "users": {
-            "description": "Пользователи с данной ролью",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/User"
-            }
-          },
-          "permissions": {
-            "description": "Разрешения, связанные с данной ролью",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Permission"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "users",
-          "permissions"
+          "isVerified"
         ]
       },
       "UserListResponse": {
@@ -1219,7 +1233,7 @@
             "description": "Список пользователей",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/User"
+              "$ref": "#/components/schemas/UserWithoutRoles"
             }
           },
           "total": {
@@ -1258,20 +1272,15 @@
           "roles"
         ]
       },
-      "RoleBasic": {
+      "RoleResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "Уникальный идентификатор роли"
-          },
           "name": {
             "type": "string",
             "description": "Название роли (уникальное)"
           }
         },
         "required": [
-          "id",
           "name"
         ]
       },
@@ -1333,13 +1342,12 @@
             "description": "Роли пользователя",
             "example": [
               {
-                "id": "35a41a41-0d6b-4319-a48a-b2f01a83451e",
                 "name": "admin"
               }
             ],
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleBasic"
+              "$ref": "#/components/schemas/RoleResponse"
             }
           }
         },
@@ -1463,6 +1471,93 @@
           "name"
         ]
       },
+      "RoleResponseWithId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Уникальный идентификатор роли"
+          },
+          "name": {
+            "type": "string",
+            "description": "Название роли (уникальное)"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "PermissionWithoutRoles": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "RoleWithUsersAndPermissions": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1",
+            "description": "ID роли"
+          },
+          "name": {
+            "type": "string",
+            "example": "admin",
+            "description": "Название роли"
+          },
+          "users": {
+            "description": "Список пользователей с этой ролью",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserWithoutRoles"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionWithoutRoles"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "users",
+          "permissions"
+        ]
+      },
+      "RoleListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Список ролей",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleWithUsersAndPermissions"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 10,
+            "description": "Общее количество записей"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ]
+      },
       "UpdateRoleDto": {
         "type": "object",
         "properties": {
@@ -1486,6 +1581,49 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "PermissionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "roles": {
+            "description": "Роли, связанные с этим разрешением",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleResponseWithId"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "roles"
+        ]
+      },
+      "PermissionListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Список разрешений",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionResponse"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Общее количество записей"
+          }
+        },
+        "required": [
+          "data",
+          "total"
         ]
       },
       "UpdatePermissionDto": {
@@ -1516,6 +1654,67 @@
         "required": [
           "username",
           "password"
+        ]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение о результате операции"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "UserData": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя"
+          },
+          "roles": {
+            "description": "Роли пользователя",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "description": "Разрешения пользователя",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "username",
+          "roles",
+          "permissions"
+        ]
+      },
+      "CheckAuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение о результате операции"
+          },
+          "user": {
+            "description": "Пользователь",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserData"
+              }
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "user"
         ]
       }
     }

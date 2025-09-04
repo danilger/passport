@@ -1,33 +1,34 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  UseGuards,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { PermissionService } from './permission.service';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Permissions } from 'src/common/decorators/permission.decorator';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBody,
-  ApiParam,
   ApiCookieAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
-import { queryDto } from 'src/common/dto/query.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { makeParams } from 'src/common/adapters/makeParams';
-import { Permission } from './entities/permission.entity';
+import { Permissions } from 'src/common/decorators/permission.decorator';
+import { queryDto } from 'src/common/dto/query.dto';
+import { PermissionGuard } from 'src/common/guards/permission.guard';
+import { CreatePermissionDto } from './dto/create-permission.dto';
+import { PermissionListResponse } from './dto/permission-list-response.dto';
+import { PermissionResponse } from './dto/permission-response.dto';
+import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { PermissionService } from './permission.service';
 
 @ApiTags('permission')
 @Controller('permission')
@@ -40,7 +41,7 @@ export class PermissionController {
   @ApiResponse({
     status: 201,
     description: 'Разрешение успешно создано',
-    type: Permission,
+    type: PermissionResponse,
 
   })
   @ApiResponse({ status: 400, description: 'Некорректные данные' })
@@ -57,6 +58,7 @@ export class PermissionController {
   @ApiResponse({
     status: 200,
     description: 'Список разрешений успешно получен',
+    type: PermissionListResponse,
   })
   @Permissions('can_read:permissions')
   @UseGuards(JwtAuthGuard, PermissionGuard)
@@ -72,6 +74,7 @@ export class PermissionController {
   @ApiResponse({
     status: 200,
     description: 'Разрешение успешно найдено',
+    type: PermissionResponse,
   })
   @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
   @Permissions('can_read:permission')
@@ -88,6 +91,7 @@ export class PermissionController {
   @ApiResponse({
     status: 200,
     description: 'Данные разрешения успешно обновлены',
+    type: PermissionResponse,
   })
   @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
   @Permissions('can_update:permission')
