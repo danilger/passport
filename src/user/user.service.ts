@@ -57,9 +57,12 @@ export class UserService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(
+    id: string,
+    options?: { cache?: { id: string; milliseconds: number } },
+  ) {
     try {
-      const user = await this.repository.findById(id);
+      const user = await this.repository.findById(id, options);
       if (!user) {
         throw new NotFoundException(`Пользователь с ID "${id}" не найден`);
       }
@@ -140,10 +143,10 @@ export class UserService {
         (role, index, self) =>
           index === self.findIndex((r) => r.id === role.id),
       );
-      
+
       //Сохраняем пользователя с обновленными ролями
       await this.repository.save(user);
-      
+
       return this.repository.findById(id);
     } catch (error) {
       if (error instanceof NotFoundException) {

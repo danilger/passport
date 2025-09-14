@@ -1,12 +1,13 @@
 // src/auth/jwt.strategy.ts
 import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Request } from 'express';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(@Inject(UserService) private readonly userService: UserService) {
     super({
       jwtFromRequest: (req: Request) => {
         if (!req.cookies) {
@@ -21,9 +22,18 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   /**
-   * validate работает только с payload из JWT токена и не делает никаких запросов к базе данных.
+   * validate проверяет JWT токен и валидирует пользователя в БД с кэшированием на 1 час.
+   * Это позволяет принудительно завершать сессии заблокированных пользователей
+   * с максимальной задержкой в 1 час.
    */
   async validate(payload: any) {
+    const user = await this.userService.findOne(payload.sub, {
+      cache: { id: payload.sub, milliseconds: 1000 * 60 * 60 * 1 }, // запрос с кэшем на 1 час
+    });
+
+    if (!user.isActive) {
+      return null;
+    }
 
     return {
       userId: payload.sub,

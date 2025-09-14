@@ -25,7 +25,7 @@ export class TypeOrmUserRepository implements IUserRepository {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string, options?: { cache?: { id: string; milliseconds: number } }): Promise<User | null> {
     try {
       return await this.userRepository.findOne({
         where: { id },
@@ -35,6 +35,7 @@ export class TypeOrmUserRepository implements IUserRepository {
             name: true,
           },
         },
+        cache: options?.cache,
       });
     } catch (error) {
       throw new Error(error);

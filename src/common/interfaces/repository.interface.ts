@@ -8,7 +8,7 @@ import { User } from 'src/user/entities/user.entity';
  * Здесь T — это тип сущности, с которой работает репозиторий (например, User, Product и т.д.).
  */
 export interface IRepository<T> {
-  findById(id: string): Promise<T | null>;
+  findById(id: string, options?: { cache?: { id: string; milliseconds: number } }): Promise<T | null>;
   findAll(params: QueryParams): Promise<T[]>;
   create(data: Partial<T>): Promise<T>;
   update(id: string, data: Partial<T>): Promise<T | null>;
