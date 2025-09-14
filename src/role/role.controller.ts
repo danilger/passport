@@ -9,27 +9,19 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiCookieAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 import { makeParams } from 'src/common/adapters/makeParams';
-import { Permissions } from 'src/common/decorators/permission.decorator';
-import { queryDto } from 'src/common/dto/query.dto';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
-import { CreateRoleDto } from './dto/create-role.dto';
 import {
-  RoleListResponse,
-  RoleWithUsersAndPermissions,
-} from './dto/role-list-response.dto';
-import { RoleResponseWithId } from './dto/role-response.dto';
+  ApiCreateRole,
+  ApiDeleteRole,
+  ApiReadRole,
+  ApiReadRoles,
+  ApiSetRolePermissions,
+  ApiUpdateRole,
+} from 'src/common/decorators/api.decorators';
+import { queryDto } from 'src/common/dto/query.dto';
+import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleService } from './role.service';
 
@@ -38,113 +30,40 @@ import { RoleService } from './role.service';
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @ApiOperation({ summary: 'Создание новой роли' })
-  @ApiCookieAuth()
-  @ApiBody({ type: CreateRoleDto })
-  @ApiResponse({
-    status: 201,
-    description: 'Роль успешно создана',
-    type: RoleResponseWithId,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Некорректные данные',
-  })
-  @Permissions('can_create:role')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiCreateRole()
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.roleService.create(createRoleDto);
   }
 
-  @ApiOperation({ summary: 'Получение списка всех ролей' })
-  @ApiCookieAuth()
-  @ApiResponse({
-    status: 200,
-    description: 'Список ролей успешно получен',
-    type: RoleListResponse,
-  })
-  @Permissions('can_read:roles')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiReadRoles()
   @Get()
   findAll(@Query() query: queryDto) {
     const params = makeParams(query);
     return this.roleService.findAll(params);
   }
 
-  @ApiOperation({ summary: 'Получение роли по ID' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'id', description: 'ID роли' })
-  @ApiResponse({
-    status: 200,
-    description: 'Роль успешно найдена',
-    type: RoleWithUsersAndPermissions,
-  })
-  @ApiResponse({ status: 404, description: 'Роль не найдена' })
-  @Permissions('can_read:role')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiReadRole()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.roleService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Обновление данных роли' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'id', description: 'ID роли' })
-  @ApiBody({ type: UpdateRoleDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Данные роли успешно обновлены',
-    type: RoleWithUsersAndPermissions,
-  })
-  @ApiResponse({ status: 404, description: 'Роль не найдена' })
-  @Permissions('can_update:role')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiUpdateRole()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.roleService.update(id, updateRoleDto);
   }
 
-  @ApiOperation({ summary: 'Удаление роли' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'id', description: 'ID роли' })
-  @ApiResponse({
-    status: 204,
-    description: 'Роль успешно удалена',
-  })
-  @ApiResponse({ status: 404, description: 'Роль не найдена' })
-  @Permissions('can_delete:role')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiDeleteRole()
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
     return this.roleService.remove(id);
   }
 
-  @ApiOperation({ summary: 'Назначение разрешений роли' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'roleName', description: 'Название роли' })
-  @ApiBody({
-    schema: {
-      properties: {
-        permissions: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Массив названий разрешений',
-          example: ['can_read', 'can_write'],
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Разрешения успешно назначены роли',
-    type: RoleWithUsersAndPermissions,
-  })
-  @ApiResponse({ status: 404, description: 'Роль или разрешения не найдены' })
-  @Permissions('can_manage:role_permissions')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiSetRolePermissions()
   @Post('set-permissions/:roleName')
   setPermissionToRole(
     @Param('roleName') roleName: string,

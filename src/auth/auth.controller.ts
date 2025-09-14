@@ -1,29 +1,26 @@
 import {
   Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Req,
   Res,
   UnauthorizedException,
   UseGuards,
-  HttpCode,
-  HttpStatus,
-  Get,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import {
-  ApiBody,
-  ApiCookieAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import {
+  ApiCheckAuth,
+  ApiLogin,
+  ApiLogout,
+  ApiRefresh,
+} from 'src/common/decorators/api.decorators';
 import { AuthService, UserWithRolesAndPermissions } from './auth.service';
-import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { LoginResponse } from './dto/login-response.dto';
-import { CheckAuthResponseDto } from './dto/check-auth-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -33,15 +30,7 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
-  @ApiOperation({ summary: 'Вход в систему' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description:
-      'Успешный вход в систему. Устанавливаются куки access_token и refresh_token',
-    type: LoginResponse,
-  })
-  @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
+  @ApiLogin()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -81,13 +70,7 @@ export class AuthController {
     return { message: 'Вход выполнен успешно' };
   }
 
-  @ApiOperation({ summary: 'Обновление токена' })
-  @ApiResponse({
-    status: 200,
-    description: 'Токен успешно обновлен. Устанавливаются новые куки',
-    type: LoginResponse,
-  })
-  @ApiResponse({ status: 401, description: 'Невалидный refresh token' })
+  @ApiRefresh()
   @Post('refresh')
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const refresh = req.cookies?.['refresh_token'];
@@ -131,13 +114,7 @@ export class AuthController {
     return { message: 'Токен успешно обновлен' };
   }
 
-  @ApiOperation({ summary: 'Выход из системы' })
-  @ApiCookieAuth()
-  @ApiResponse({
-    status: 200,
-    description: 'Успешный выход. Куки удалены',
-    type: LoginResponse,
-  })
+  @ApiLogout()
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
@@ -152,12 +129,7 @@ export class AuthController {
     return { message: 'Выход выполнен успешно' };
   }
 
-  @ApiOperation({ summary: 'Проверка аутентификации' })
-  @ApiResponse({
-    status: 200,
-    description: 'Проверка аутентификации прошла успешно',
-    type: CheckAuthResponseDto,
-  })
+  @ApiCheckAuth()
   @Get('check')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

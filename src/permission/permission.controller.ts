@@ -9,24 +9,18 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBody,
-  ApiCookieAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 import { makeParams } from 'src/common/adapters/makeParams';
-import { Permissions } from 'src/common/decorators/permission.decorator';
+import {
+  ApiCreatePermission,
+  ApiDeletePermission,
+  ApiReadPermission,
+  ApiReadPermissions,
+  ApiUpdatePermission,
+} from 'src/common/decorators/api.decorators';
 import { queryDto } from 'src/common/dto/query.dto';
-import { PermissionGuard } from 'src/common/guards/permission.guard';
 import { CreatePermissionDto } from './dto/create-permission.dto';
-import { PermissionListResponse } from './dto/permission-list-response.dto';
-import { PermissionResponse } from './dto/permission-response.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { PermissionService } from './permission.service';
 
@@ -35,67 +29,27 @@ import { PermissionService } from './permission.service';
 export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
-  @ApiOperation({ summary: 'Создание нового разрешения' })
-  @ApiCookieAuth()
-  @ApiBody({ type: CreatePermissionDto })
-  @ApiResponse({
-    status: 201,
-    description: 'Разрешение успешно создано',
-    type: PermissionResponse,
-
-  })
-  @ApiResponse({ status: 400, description: 'Некорректные данные' })
-  @Permissions('can_create:permission')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiCreatePermission()
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createPermissionDto: CreatePermissionDto) {
     return this.permissionService.create(createPermissionDto);
   }
 
-  @ApiOperation({ summary: 'Получение списка всех разрешений' })
-  @ApiCookieAuth()
-  @ApiResponse({
-    status: 200,
-    description: 'Список разрешений успешно получен',
-    type: PermissionListResponse,
-  })
-  @Permissions('can_read:permissions')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiReadPermissions()
   @Get()
   findAll(@Query() query: queryDto) {
     const params = makeParams(query);
     return this.permissionService.findAll(params);
   }
 
-  @ApiOperation({ summary: 'Получение разрешения по ID' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'id', description: 'ID разрешения' })
-  @ApiResponse({
-    status: 200,
-    description: 'Разрешение успешно найдено',
-    type: PermissionResponse,
-  })
-  @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
-  @Permissions('can_read:permission')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiReadPermission()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.permissionService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Обновление данных разрешения' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'id', description: 'ID разрешения' })
-  @ApiBody({ type: UpdatePermissionDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Данные разрешения успешно обновлены',
-    type: PermissionResponse,
-  })
-  @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
-  @Permissions('can_update:permission')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiUpdatePermission()
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -104,16 +58,7 @@ export class PermissionController {
     return this.permissionService.update(id, updatePermissionDto);
   }
 
-  @ApiOperation({ summary: 'Удаление разрешения' })
-  @ApiCookieAuth()
-  @ApiParam({ name: 'id', description: 'ID разрешения' })
-  @ApiResponse({
-    status: 204,
-    description: 'Разрешение успешно удалено',
-  })
-  @ApiResponse({ status: 404, description: 'Разрешение не найдено' })
-  @Permissions('can_delete:permission')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @ApiDeletePermission()
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {

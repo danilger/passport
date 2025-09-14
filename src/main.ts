@@ -23,8 +23,9 @@ async function bootstrap() {
   app.enableCors({
     origin: 'http://127.0.0.1:5173', // URL нашего фронтенда
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    // allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', ],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', ],
     credentials: true, // Разрешаем передачу кук
+    exposedHeaders: ['Set-Cookie'], // Позволяем клиенту видеть Set-Cookie заголовки
   });
 
   // Добавляем глобальную валидацию
